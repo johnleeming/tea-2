@@ -5,25 +5,31 @@ import os
 
 home_path =  os.path.expanduser('~/')
 word_file = 'word_lists/wlist_match12.txt'
-word_list = []
-match_list = []
+
 
 def load_list(filename):
+    temp_list = []
     with open (home_path + filename, 'r') as input_file:
         for line in input_file:
-            word_list.append(line[:-1])
-    print(filename + ' words: ' + str(len(word_list)))
+            temp_list.append(line[:-1])
+    print(filename + ' words: ' + str(len(temp_list)))
+    return(temp_list)
 
-load_list(word_file)
+def find_matches(query, list):
+    start_time = datetime.now()
+    matches = []
+    for i in list:
+        if query.match(i):
+            matches.append(i)
+    end_time = datetime.now()
+    time_taken = end_time - start_time
+    return(matches, time_taken)
+
+word_list = load_list(word_file)
 input_query = input('Enter Regex Query:')
-query = re.compile(input_query)
+re_query = re.compile(input_query)
 
-start_time = datetime.now()
-for i in word_list:
-    if query.match(i):
-        match_list.append(i)
-end_time = datetime.now()
-search_time = end_time - start_time
+match_list, search_time = find_matches(re_query,word_list)
 
 if len(match_list) > 0:
     print(str(len(match_list)) + ' matches found')
