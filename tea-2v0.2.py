@@ -4,7 +4,7 @@ import re
 import os
 
 home_path =  os.path.expanduser('~/')
-word_file = 'word_lists/wlist_match12.txt'
+word_file = 'word_lists/wlist_match3.txt'
 
 
 def load_list(filename):
@@ -37,4 +37,5 @@ if len(match_list) > 0:
 else:
     print('No match found')
 print('search took: ' + str(search_time.total_seconds()) + ' seconds')
-#root = tk.Tk()
+
+root = tk.Tk()
