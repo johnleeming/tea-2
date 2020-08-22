@@ -48,24 +48,30 @@ def go():
     query = input_query.get()
     min_len = int(min_length.get())
     max_len = int(max_length.get())
-    re_query = re.compile(query)
-    match_list, search_time = find_matches(re_query, word_list, min_len, max_len)
-    time_text = 'search took: ' + str(search_time.total_seconds()) + ' seconds'
-    solution_time_label = tk.Label(root, text = time_text, font=(text_font, text_size),bg=bgcolour[theme],
-                                   fg=fgcolour[theme]).grid(row = 10, column = 0, columnspan = 2)
-    no_results_text = str(len(match_list)) + ' matches found'
-    no_results_label = tk.Label(root, text = no_results_text, font=(text_font, text_size),bg=bgcolour[theme],
-                                fg=fgcolour[theme]).grid(row = 10, column = 2, columnspan = 2)
-
-    results_text = scrolledtext.ScrolledText(root, font=(text_font, text_size),bg=bgcolour[theme],fg=fgcolour[theme],
-                             wrap = 'word')
+    results_text = scrolledtext.ScrolledText(root, font=(text_font, text_size), bg=bgcolour[theme], fg=fgcolour[theme],
+                                             wrap='word')
     font_in_use = tkfont.Font(font=results_text['font'])
     tab_width = font_in_use.measure('M' * (max_len + 2))
-    print(tab_width)
     results_text.config(tabs=(tab_width,))
-    results_text.grid(row = 12, column = 0, columnspan = 4)
+    results_text.grid(row=12, column=0, columnspan=4)
     results_text.delete(1.0)
-    results_text.insert(1.0,match_list)
+    error_state = tk.StringVar()
+    error_label = tk.Label(root, textvar=error_state, font=(text_font, text_size), bg=bgcolour[theme],
+                           fg='red').grid(row=1, column=2, sticky='ew')
+    try:
+        error_state.set(' ')
+        re_query = re.compile(query)
+        match_list, search_time = find_matches(re_query, word_list, min_len, max_len)
+        time_text = 'search took: ' + str(search_time.total_seconds()) + ' seconds'
+        solution_time_label = tk.Label(root, text = time_text, font=(text_font, text_size),bg=bgcolour[theme],
+                                       fg=fgcolour[theme]).grid(row = 10, column = 0, columnspan = 2, sticky='ew')
+        no_results_text = str(len(match_list)) + ' matches found'
+        no_results_label = tk.Label(root, text = no_results_text, font=(text_font, text_size),bg=bgcolour[theme],
+                                    fg=fgcolour[theme]).grid(row = 10, column = 2, columnspan = 2, sticky='ew')
+        results_text.insert(1.0,match_list)
+    except:
+        error_state.set('Not valid REGEX')
+        results_text.delete(1.0)
 
 
 root = tk.Tk()
@@ -83,21 +89,21 @@ prompt = tk.Label(root, text = 'Enter Regex query: ', font=(text_font, text_size
     .grid(row = 1, column = 0, padx=paddingh, pady=paddingv)
 input_query = tk.StringVar()
 query_entry = tk.Entry(root, textvariable = input_query, font=(text_font, text_size),bg=bgcolour[theme],
-                       fg=fgcolour[theme]).grid(row = 1, column = 1, columnspan = 2)
+                       fg=fgcolour[theme]).grid(row = 1, column = 1, sticky='ew')
 enter_button = tk.Button(root, text="Go", font=(text_font, text_size), bg=buttonbg[theme], fg=fgcolour[theme],
-                           command= go).grid(row=1, column = 3, padx=paddingh, pady=paddingv)
+                           command= go).grid(row=1, column = 3, padx=paddingh, pady=paddingv, sticky='ew')
 min_length_label = tk.Label(root, text = 'Minimum length: ', font=(text_font, text_size),bg=bgcolour[theme],fg=fgcolour[theme])\
-    .grid(row = 2, column = 0, padx=paddingh, pady=paddingv)
+    .grid(row = 2, column = 0, padx=paddingh, pady=paddingv, sticky='ew')
 min_length = tk.StringVar()
 min_length.set(3)
 min_length_entry = tk.Entry(root, textvariable = min_length, font=(text_font, text_size),bg=bgcolour[theme],
-                       fg=fgcolour[theme]).grid(row = 2, column = 1, padx=paddingh, pady=paddingv)
+                       fg=fgcolour[theme]).grid(row = 2, column = 1, padx=paddingh, pady=paddingv, sticky='ew')
 max_length_label = tk.Label(root, text = 'Maximum length: ', font=(text_font, text_size),bg=bgcolour[theme],fg=fgcolour[theme])\
-    .grid(row = 2, column = 2, padx=paddingh, pady=paddingv)
+    .grid(row = 2, column = 2, padx=paddingh, pady=paddingv, sticky='ew')
 max_length = tk.StringVar()
 max_length.set(12)
 max_length_entry = tk.Entry(root, textvariable = max_length, font=(text_font, text_size),bg=bgcolour[theme],
-                       fg=fgcolour[theme]).grid(row = 2, column = 3, padx=paddingh, pady=paddingv)
+                       fg=fgcolour[theme]).grid(row = 2, column = 3, padx=paddingh, pady=paddingv, sticky='ew')
 hint_label = tk.Label(root, text = hint_text, font=(text_font, text_size-2 ),bg=bgcolour[theme],fg=fgcolour[theme])\
     .grid(row = 3, sticky='wn', column = 0, columnspan =4, padx=paddingh, pady=paddingv)
 
