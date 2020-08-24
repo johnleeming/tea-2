@@ -8,7 +8,7 @@ import logging
 from idlelib import tooltip
 
 home_path = os.path.expanduser('~/')
-word_file = home_path + 'word_lists/wlist_match3.txt'
+word_file = home_path + 'word_lists/default.txt'
 text_font = "liberation sans"
 text_size = 16
 bgcolour = {'dark': 'black', 'light': 'white', 'alarm': 'red'}
@@ -24,7 +24,7 @@ paddingv = 5
 hint_text = "[abc] - one of the listed letters | . any character | * 0 or more | + 1 or more | ? optional | (a|b) a or b " \
             "| \Z end of string"
 log_file = home_path + 'logs/tea-2' + datetime.now().strftime('%y-%m-%d') + '.txt'
-logging.basicConfig(filename=log_file, level=logging.DEBUG, format='%(asctime)s %(levelname)s %(message)s')
+logging.basicConfig(filename=log_file, level=logging.INFO, format='%(asctime)s %(levelname)s %(message)s')
 punctuation = {33: None, 34: None, 39: None, 40: None, 41: None, 42: None, 44: None, 45: None, 58: None, 59: None,
                94: None, 95: None, 96: None}
 match_word = []
