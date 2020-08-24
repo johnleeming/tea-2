@@ -24,7 +24,7 @@ paddingv = 5
 hint_text= "[abc] - one of the listed letters | . any character | * 0 or more | + 1 or more | ? optional | (a|b) a or b " \
            "| \Z end of string"
 log_file = home_path + 'logs/tea-2' + datetime.now().strftime('%y-%m-%d') + '.txt'
-logging.basicConfig(filename=log_file,level=logging.INFO, format='%(asctime)s %(levelname)s %(message)s')
+#logging.basicConfig(filename=log_file,level=logging.INFO, format='%(asctime)s %(levelname)s %(message)s')
 punctuation = {33: None, 34: None, 39: None, 40: None, 41: None, 42: None, 44: None, 45: None, 58: None, 59: None,
                94: None, 95: None, 96: None }
 
@@ -68,9 +68,9 @@ def find_matches(query, list, min, max, ignore_punct):
 
 
 def display_results(matches, first):
-    match_word = []
+    match_word = ['           ']*40
     match_tip = []
-    tip_text = []
+    tip_text = ['']*40
     if len(matches) - first < 39:
         last = len(matches)-1
     else:
@@ -79,22 +79,27 @@ def display_results(matches, first):
     while i <= last - first:
         column_no = int(i/10)
         row_no = 20+ i - column_no * 10
-        match_word.append(tk.Label(root,text = matches[first + i], font=(text_font, text_size),bg=bgcolour[theme],
-                                   fg=fgcolour[theme], justify=LEFT))
+        match_word[i] = tk.Label(root,text = matches[first + i], font=(text_font, text_size),bg=bgcolour[theme],
+                                   fg=fgcolour[theme], justify='left')
         match_word[i].grid(row=row_no, column = column_no, sticky='ew')
-        tip_text.append(get_definition(matches[first + i]))
-#        match_tip.append(tooltip.Hovertip(match_word[i],tip_text[i]))
+        tip_text[i] =get_definition(matches[first + i])
         tooltip.Hovertip(match_word[i], tip_text[i])
+        i +=1
+    while 1 < 39:
+        column_no = int(i / 10)
+        row_no = 20 + i - column_no * 10
+        match_word[i] = tk.Label(root,text = '          ', font=(text_font, text_size),bg=bgcolour[theme],
+                                   fg=fgcolour[theme], justify='left')
+        match_word[i].grid(row=row_no, column = column_no, sticky='ew')
         i +=1
 
 
 def get_definition(word):
     try:
-        response = subprocess.run('dict',word,)
-        definition = response.stdout()
-        print(response.stderr())
+        response = subprocess.run(['dict',word,], capture_output=True)
+        definition = response.stdout
     except:
-        logging.error('dict lookup failed ')
+#        logging.error('dict lookup failed ')
         definition = 'Lookup failed'
     return definition
 
