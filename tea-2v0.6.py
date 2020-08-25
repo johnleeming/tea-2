@@ -17,7 +17,7 @@ bgcolour = {'dark': 'black', 'light': 'white', 'alarm': 'red'}
 fgcolour = {'dark': 'white', 'light': 'black', 'alarm': 'black'}
 buttonbg = {'dark': 'darkgrey', 'light': 'lightgrey', 'alarm': 'darkgrey'}
 theme = 'light'
-winheight = 1000
+winheight = 800
 winwidth = 1000
 winx = 100
 winy = 100
@@ -119,13 +119,13 @@ class OnHoverTooltipBase(TooltipBase):
         self.hover_delay = hover_delay
 
         self._after_id = None
-        self._id1 = self.anchor_widget.bind("<Enter>", self._show_event)
+#        self._id1 = self.anchor_widget.bind("<Enter>", self._show_event)
         self._id2 = self.anchor_widget.bind("<Leave>", self._hide_event)
-        self._id3 = self.anchor_widget.bind("<Button>", self._hide_event)
+        self._id3 = self.anchor_widget.bind("<Button>", self._show_event)
 
     def __del__(self):
         try:
-            self.anchor_widget.unbind("<Enter>", self._id1)
+#            self.anchor_widget.unbind("<Enter>", self._id1)
             self.anchor_widget.unbind("<Leave>", self._id2)  # pragma: no cover
             self.anchor_widget.unbind("<Button>", self._id3) # pragma: no cover
         except TclError:
@@ -181,8 +181,8 @@ class Hovertip(OnHoverTooltipBase):
         self.text = text
 
     def showcontents(self):
-        label = scrolledtext.ScrolledText(self.tipwindow,
-                      background=bgcolour[theme], relief=SOLID, borderwidth=1, font=(text_font, text_size-2))
+        label = scrolledtext.ScrolledText(self.tipwindow, background=bgcolour[theme], relief=SOLID, borderwidth=1,
+                                          font=(text_font, text_size-2), fg=fgcolour[theme], wrap='word', height=12)
         label.insert(1.0,self.text)
         label.pack()
 
@@ -237,8 +237,8 @@ def display_results(matches, no_matches, first):
     while i <= last - first:
         column_no = int(i / 10)
         row_no = 20 + i - column_no * 10
-        match_word.append(tk.Label(root, text=matches[first + i], font=(text_font, text_size), bg=bgcolour[theme],
-                                   fg=fgcolour[theme], justify='left'))
+        match_word.append(tk.Button(root, text=matches[first + i], font=(text_font, text_size), bg=bgcolour[theme],
+                                   fg=fgcolour[theme], anchor='w', command = lambda: toggle(match_word[i-1])))
         match_word[i].grid(row=row_no, column=column_no, sticky='ew')
         i += 1
 
@@ -302,6 +302,13 @@ def go():
         error_state.set('Not valid REGEX')
     if no_matches > 0:
         get_tooltips(match_list, no_matches, start_no)
+
+
+def toggle(button):
+    if button.config('relief')[-1] == 'raised':
+        button.config(relief="sunken")
+    else:
+        button.config(relief="raised")
 
 
 root = tk.Tk()
