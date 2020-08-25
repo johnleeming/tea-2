@@ -3,6 +3,8 @@ import re
 import subprocess
 import tkinter as tk
 from tkinter import filedialog
+from tkinter import scrolledtext
+from tkinter import *
 from datetime import datetime
 import logging
 
@@ -35,9 +37,7 @@ class TooltipBase(object):
 
     def __init__(self, anchor_widget):
         """Create a tooltip.
-
         anchor_widget: the widget next to which the tooltip will be shown
-
         Note that a widget will only be shown when showtip() is called.
         """
         self.anchor_widget = anchor_widget
@@ -181,8 +181,9 @@ class Hovertip(OnHoverTooltipBase):
         self.text = text
 
     def showcontents(self):
-        label = Label(self.tipwindow, text=self.text, justify=LEFT,
-                      background="#ffffe0", relief=SOLID, borderwidth=1)
+        label = scrolledtext.ScrolledText(self.tipwindow,
+                      background=bgcolour[theme], relief=SOLID, borderwidth=1, font=(text_font, text_size-2))
+        label.insert(1.0,self.text)
         label.pack()
 
 
@@ -252,7 +253,7 @@ def get_tooltips(matches, no_matches, first):
     i = 0
     while i <= last - first:
         tip_text.append(get_definition(matches[first + i]))
-        tooltip.Hovertip(match_word[i], tip_text[i], hover_delay=300)
+        Hovertip(match_word[i], tip_text[i], hover_delay=300)
         i += 1
 
 
