@@ -30,162 +30,8 @@ logging.basicConfig(filename=log_file, level=logging.INFO, format='%(asctime)s %
 punctuation = {33: None, 34: None, 39: None, 40: None, 41: None, 42: None, 44: None, 45: None, 58: None, 59: None,
                94: None, 95: None, 96: None}
 match_word = []
+match_list = []
 hover_tip = []
-
-
-class TooltipBase(object):
-    """abstract base class for tooltips"""
-
-    def __init__(self, anchor_widget):
-        """Create a tooltip.
-        anchor_widget: the widget next to which the tooltip will be shown
-        Note that a widget will only be shown when showtip() is called.
-        """
-        self.anchor_widget = anchor_widget
-        self.tipwindow = None
-
-    def __del__(self):
-        self.hidetip()
-
-    def showtip(self):
-        """display the tooltip"""
-        if self.tipwindow:
-            return
-        self.tipwindow = tw = Toplevel(self.anchor_widget)
-        # show no border on the top level window
-        tw.wm_overrideredirect(1)
-        try:
-            # This command is only needed and available on Tk >= 8.4.0 for OSX.
-            # Without it, call tips intrude on the typing process by grabbing
-            # the focus.
-            tw.tk.call("::tk::unsupported::MacWindowStyle", "style", tw._w,
-                       "help", "noActivates")
-        except TclError:
-            pass
-
-        self.position_window()
-        self.showcontents()
-        self.tipwindow.update_idletasks()  # Needed on MacOS -- see #34275.
-        self.tipwindow.lift()  # work around bug in Tk 8.5.18+ (issue #24570)
-
-    def position_window(self):
-        """(re)-set the tooltip's screen position"""
-        x, y = self.get_position()
-        root_x = self.anchor_widget.winfo_rootx() + x
-        root_y = self.anchor_widget.winfo_rooty() + y
-        self.tipwindow.wm_geometry("+%d+%d" % (root_x, root_y))
-
-    def get_position(self):
-        """choose a screen position for the tooltip"""
-        # The tip window must be completely outside the anchor widget;
-        # otherwise when the mouse enters the tip window we get
-        # a leave event and it disappears, and then we get an enter
-        # event and it reappears, and so on forever :-(
-        #
-        # Note: This is a simplistic implementation; sub-classes will likely
-        # want to override this.
-        return 20, self.anchor_widget.winfo_height() + 1
-
-    def showcontents(self):
-        """content display hook for sub-classes"""
-        # See ToolTip for an example
-        raise NotImplementedError
-
-    def hidetip(self):
-        """hide the tooltip"""
-        # Note: This is called by __del__, so careful when overriding/extending
-        tw = self.tipwindow
-        self.tipwindow = None
-        if tw:
-            try:
-                tw.destroy()
-            except TclError:  # pragma: no cover
-                pass
-
-
-class OnHoverTooltipBase(TooltipBase):
-    """abstract base class for tooltips, with delayed on-hover display"""
-
-    def __init__(self, anchor_widget, hover_delay=1000):
-        """Create a tooltip with a mouse hover delay.
-
-        anchor_widget: the widget next to which the tooltip will be shown
-        hover_delay: time to delay before showing the tooltip, in milliseconds
-
-        Note that a widget will only be shown when showtip() is called,
-        e.g. after hovering over the anchor widget with the mouse for enough
-        time.
-        """
-        super(OnHoverTooltipBase, self).__init__(anchor_widget)
-        self.hover_delay = hover_delay
-
-        self._after_id = None
-#        self._id1 = self.anchor_widget.bind("<Enter>", self._show_event)
-#        self._id2 = self.anchor_widget.bind("<Leave>", self._hide_event)
-#        self._id3 = self.anchor_widget.bind("<Button>", self._show_event)
-
-    def __del__(self):
-        try:
-            self.anchor_widget.unbind("<Enter>", self._id1)
-            self.anchor_widget.unbind("<Leave>", self._id2)  # pragma: no cover
-            self.anchor_widget.unbind("<Button>", self._id3) # pragma: no cover
-        except TclError:
-            pass
-        super(OnHoverTooltipBase, self).__del__()
-
-    def _show_event(self, event=None):
-        """event handler to display the tooltip"""
-        if self.hover_delay:
-            self.schedule()
-        else:
-            self.showtip()
-
-    def _hide_event(self, event=None):
-        """event handler to hide the tooltip"""
-        self.hidetip()
-
-    def schedule(self):
-        """schedule the future display of the tooltip"""
-        self.unschedule()
-        self._after_id = self.anchor_widget.after(self.hover_delay,
-                                                  self.showtip)
-
-    def unschedule(self):
-        """cancel the future display of the tooltip"""
-        after_id = self._after_id
-        self._after_id = None
-        if after_id:
-            self.anchor_widget.after_cancel(after_id)
-
-    def hidetip(self):
-        """hide the tooltip"""
-        try:
-            self.unschedule()
-        except TclError:  # pragma: no cover
-            pass
-        super(OnHoverTooltipBase, self).hidetip()
-
-
-class Hovertip(OnHoverTooltipBase):
-    "A tooltip that pops up when a mouse hovers over an anchor widget."
-    def __init__(self, anchor_widget, text, hover_delay=1000):
-        """Create a text tooltip with a mouse hover delay.
-
-        anchor_widget: the widget next to which the tooltip will be shown
-        hover_delay: time to delay before showing the tooltip, in milliseconds
-
-        Note that a widget will only be shown when showtip() is called,
-        e.g. after hovering over the anchor widget with the mouse for enough
-        time.
-        """
-        super(Hovertip, self).__init__(anchor_widget, hover_delay=hover_delay)
-        self.text = text
-
-    def showcontents(self):
-        label = scrolledtext.ScrolledText(self.tipwindow, background=bgcolour[theme], relief=SOLID, borderwidth=1,
-                                          font=(text_font, text_size-2), fg=fgcolour[theme], wrap='word', height=12)
-        label.insert(1.0,self.text)
-        label.pack()
 
 
 def choose_list():
@@ -238,23 +84,9 @@ def display_results(matches, no_matches, first):
     while i <= last - first:
         column_no = int(i / 10)
         row_no = 20 + i - column_no * 10
-        match_word.append(tk.Button(root, text=matches[first + i], font=(text_font, text_size), bg=bgcolour[theme],
-                                   fg=fgcolour[theme], anchor='w', command = lambda b= i: toggle(b)))
+        match_word.append(tk.Button(root, text=matches[first + i], font=(text_font, text_size), command = lambda b= i: toggle(b)))
+        match_word[i].configure(anchor='w', relief='raised')
         match_word[i].grid(row=row_no, column=column_no, sticky='ew')
-        i += 1
-
-
-def get_tooltips(matches, no_matches, first):
-    global match_word, hover_tip
-    tip_text = []
-    if no_matches - first < 39:
-        last = no_matches - 1
-    else:
-        last = first + 39
-    i = 0
-    while i <= last - first:
-        tip_text.append(get_definition(matches[first + i]))
-        hover_tip.append(Hovertip(match_word[i], tip_text[i], hover_delay=300))
         i += 1
 
 
@@ -278,6 +110,7 @@ def go_enter(event):
 
 def go():
     start_no = 0
+    global match_list
     query = input_query.get()
     min_len = min_length.get()
     max_len = max_length.get()
@@ -301,19 +134,25 @@ def go():
     except:
         logging.exception('regex error: ' + query)
         error_state.set('Not valid REGEX')
-    if no_matches > 0:
-        get_tooltips(match_list, no_matches, start_no)
+
 
 
 def toggle(button_no):
-    global match_word, hover_tip
-    print(button_no)
-    if match_word[button_no].config('relief') == 'raised':
+    global match_word, definition
+    definition.delete(1.0,END)
+    if match_word[button_no].config('relief')[-1] == 'raised':
         match_word[button_no].config(relief="sunken")
-        hover_tip[button_no].showtip()
+        definition_text = get_definition(match_list[button_no])
+        definition.insert(1.0,definition_text)
+        i=0
+        while i < len(match_word):
+            if i != button_no and match_word[i].config('relief')[-1] == 'sunken':
+                match_word[i].config(relief = 'raised')
+            i += 1
     else:
+        print('sunken')
         match_word[button_no].config(relief="raised")
-        hover_tip[button_no].hidetip()
+
 
 
 root = tk.Tk()
@@ -340,7 +179,7 @@ prompt = tk.Label(root, text='Enter Regex query: ', font=(text_font, text_size),
 input_query = tk.StringVar()
 query_entry = tk.Entry(root, textvariable=input_query, font=(text_font, text_size), bg=bgcolour[theme],
                        fg=fgcolour[theme])
-query_entry.grid(row=1, column=1, sticky='ew')
+query_entry.grid(row=1, column=1, columnspan = 2, sticky='ew')
 query_entry.bind('<Return>', go_enter)
 enter_button = tk.Button(root, text="Go", font=(text_font, text_size), bg=buttonbg[theme], fg=fgcolour[theme],
                          command=go).grid(row=1, column=3, padx=paddingh, pady=paddingv, sticky='ew')
@@ -360,5 +199,8 @@ max_length_entry = tk.Entry(root, textvariable=max_length, font=(text_font, text
                             fg=fgcolour[theme]).grid(row=2, column=3, padx=paddingh, pady=paddingv, sticky='ew')
 hint_label = tk.Label(root, text=hint_text, font=(text_font, text_size - 2), bg=bgcolour[theme], fg=fgcolour[theme]) \
     .grid(row=3, sticky='wn', column=0, columnspan=4, padx=paddingh, pady=paddingv)
+definition = scrolledtext.ScrolledText(root, background=bgcolour[theme], relief=SOLID, borderwidth=1,
+                                       font=(text_font, text_size - 2), fg=fgcolour[theme], wrap='word', height=12)
+definition.grid(row=50, column=0, columnspan=4)
 
 root.mainloop()
