@@ -17,7 +17,7 @@ bgcolour = {'dark': 'black', 'light': 'white', 'alarm': 'red'}
 fgcolour = {'dark': 'white', 'light': 'black', 'alarm': 'black'}
 buttonbg = {'dark': 'darkgrey', 'light': 'lightgrey', 'alarm': 'darkgrey'}
 theme = 'light'
-winheight = 800
+winheight = 900
 winwidth = 1000
 winx = 100
 winy = 100
@@ -84,7 +84,8 @@ def display_results(matches, no_matches, first):
     while i <= last - first:
         column_no = int(i / 10)
         row_no = 20 + i - column_no * 10
-        match_word.append(tk.Button(root, text=matches[first + i], font=(text_font, text_size), command = lambda b= i: toggle(b)))
+        match_word.append(tk.Button(root, text=matches[first + i], font=(text_font, text_size - 1),
+                                    command = lambda b= i: toggle(b)))
         match_word[i].configure(anchor='w', relief='raised')
         match_word[i].grid(row=row_no, column=column_no, sticky='ew')
         i += 1
@@ -164,6 +165,8 @@ root['bg'] = bgcolour[theme]
 root.geometry('%dx%d+%d+%d' % (winwidth, winheight, winx, winy))
 root.grid_columnconfigure(0, weight=1)
 root.grid_columnconfigure(1, weight=1)
+root.grid_columnconfigure(2, weight=1)
+root.grid_columnconfigure(3, weight=1)
 load_button_message = tk.StringVar()
 load_button_message.set(load_message)
 load_message_button = tk.Button(root, textvar=load_button_message, font=(text_font, text_size), bg=buttonbg[theme],
