@@ -17,10 +17,12 @@ bgcolour = {'dark': 'black', 'light': 'white', 'alarm': 'red'}
 fgcolour = {'dark': 'white', 'light': 'black', 'alarm': 'black'}
 buttonbg = {'dark': 'darkgrey', 'light': 'lightgrey', 'alarm': 'darkgrey'}
 theme = 'light'
-winheight = 900
+winheight = 180
 winwidth = 1000
+rwinheight = 680
 winx = 100
-winy = 100
+winy = 50
+rwiny = winy+ winheight + 40
 paddingh = 5
 paddingv = 5
 hint_text = "[abc] - one of the listed letters | . any character | * 0 or more | + 1 or more | ? optional | (a|b) a or b " \
@@ -70,8 +72,23 @@ def find_matches(query, list, min, max, ignore_punct, case_sense):
     return (matches, no_matches, time_taken)
 
 
-def display_results(matches, no_matches, first):
-    global match_word
+def display_results(matches, no_matches, first, time_text, no_results_text):
+    global match_word, definition_box, results_window
+    results_window = tk.Toplevel()
+    results_window.title('Results')
+    results_window['bg'] = bgcolour[theme]
+    results_window.geometry('%dx%d+%d+%d' % (winwidth, rwinheight, winx, rwiny ))
+    results_window.grid_columnconfigure(0, weight=1)
+    results_window.grid_columnconfigure(1, weight=1)
+    results_window.grid_columnconfigure(2, weight=1)
+    results_window.grid_columnconfigure(3, weight=1)
+    solution_time_label = tk.Label(results_window, text=time_text, font=(text_font, text_size), bg=bgcolour[theme],
+                                   fg=fgcolour[theme]).grid(row=10, column=0, columnspan=2, sticky='ew')
+    no_results_label = tk.Label(results_window, text=no_results_text, font=(text_font, text_size), bg=bgcolour[theme],
+                                fg=fgcolour[theme]).grid(row=10, column=2, columnspan=2, sticky='ew')
+    definition_box = scrolledtext.ScrolledText(results_window, background=bgcolour[theme], relief=SOLID, borderwidth=1,
+                                           font=(text_font, text_size - 2), fg=fgcolour[theme], wrap='word', height=12)
+    definition_box.grid(row=50, column=0, columnspan=4)
     i=0
     while i > len(match_word):
         match_word[i].grid_forget()
@@ -87,7 +104,7 @@ def display_results(matches, no_matches, first):
     while i <= last - first:
         column_no = int(i / 10)
         row_no = 20 + i - column_no * 10
-        match_word.append(tk.Button(root, text=matches[first + i], font=(text_font, text_size - 1),
+        match_word.append(tk.Button(results_window , text=matches[first + i], font=(text_font, text_size - 1),
                                     command = lambda b= i: toggle(b)))
         match_word[i].configure(anchor='w', relief='raised')
         match_word[i].grid(row=row_no, column=column_no, sticky='ew')
@@ -114,7 +131,9 @@ def go_enter(event):
 
 def go():
     start_no = 0
-    global match_list
+    global match_list, results_window
+    if len(match_list) > 0:
+        results_window.destroy()
     query = input_query.get()
     min_len = min_length.get()
     max_len = max_length.get()
@@ -131,27 +150,22 @@ def go():
         match_list, no_matches, search_time = find_matches(re_query, word_list, min_len, max_len, ignore_punct,
                                                            case_sensitivity)
         time_text = 'search took: ' + str(search_time.total_seconds()) + ' seconds'
-        solution_time_label = tk.Label(root, text=time_text, font=(text_font, text_size), bg=bgcolour[theme],
-                                       fg=fgcolour[theme]).grid(row=10, column=0, columnspan=2, sticky='ew')
         no_results_text = str(no_matches) + ' matches found'
         if no_matches > 40:
             no_results_text += ' (first 40 displayed)'
-        no_results_label = tk.Label(root, text=no_results_text, font=(text_font, text_size), bg=bgcolour[theme],
-                                    fg=fgcolour[theme]).grid(row=10, column=2, columnspan=2, sticky='ew')
-        display_results(match_list, no_matches, start_no)
+        display_results(match_list, no_matches, start_no, time_text, no_results_text)
     except:
         logging.exception('regex error: ' + query)
         error_state.set('Not valid REGEX')
 
 
-
 def toggle(button_no):
-    global match_word, definition
-    definition.delete(1.0,END)
+    global match_word, definition_box
+    definition_box.delete(1.0,END)
     if match_word[button_no].config('relief')[-1] == 'raised':
         match_word[button_no].config(relief="sunken")
         definition_text = get_definition(match_list[button_no])
-        definition.insert(1.0,definition_text)
+        definition_box.insert(1.0,definition_text)
         i=0
         while i < len(match_word):
             if i != button_no and match_word[i].config('relief')[-1] == 'sunken':
@@ -214,8 +228,6 @@ max_length_entry = tk.Entry(root, textvariable=max_length, font=(text_font, text
                             fg=fgcolour[theme]).grid(row=2, column=3, padx=paddingh, pady=paddingv, sticky='ew')
 hint_label = tk.Label(root, text=hint_text, font=(text_font, text_size - 2), bg=bgcolour[theme], fg=fgcolour[theme]) \
     .grid(row=3, sticky='wn', column=0, columnspan=4, padx=paddingh, pady=paddingv)
-definition = scrolledtext.ScrolledText(root, background=bgcolour[theme], relief=SOLID, borderwidth=1,
-                                       font=(text_font, text_size - 2), fg=fgcolour[theme], wrap='word', height=12)
-definition.grid(row=50, column=0, columnspan=4)
+
 
 root.mainloop()
