@@ -1,6 +1,7 @@
 import urllib.request
 import string
 import os
+import unicodedata
 
 home_path = os.path.expanduser('~/')
 output_file = home_path + 'word_lists/British_place_names.txt'
@@ -16,19 +17,31 @@ output_list = []
 temp_list =[]
 for c in string.ascii_lowercase:
     print(c)
+#    try:
     request = urllib.request.Request(url_base + c, headers = hdr)  # The assembled request
     response = urllib.request.urlopen(request)
-    data = str(response.read())
+    data = response.read().decode(response.headers.get_content_charset())
     lines = data.split(r'\n')
+#    except:
+#        print('error with ' + url_base + c)
+#        lines = 'x'
     for line in lines:
         temp = line.replace(r'\t','')
         temp = temp.replace('<strong>', '')
         if temp[0:4] =='<li>':
             temp_list = temp.split('>')
-            name = temp_list[2].replace('</a','')
-            print(name)
-            output_list.append(name)
+            b=0
+            while b < len(temp_list) -1:
+                if temp_list[b][0].lower() == c:
+                    name = temp_list[b].replace('</a','')
+                    name = str(unicodedata.normalize('NFD', name).encode('ascii', 'ignore'))
+                    name = name.replace('\\','')
+                    print(name)
+                    output_list.append(name)
+                b += 1
 
-with open(output_file, 'w') as out:
+
+
+with open(output_file, 'a') as out:
     for n in output_list:
         out.writelines(n+'\n')
