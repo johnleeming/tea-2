@@ -120,7 +120,7 @@ def get_definition(word):
         else:
             definition = 'No definitions found.'
         logging.debug(response.stderr)
-    except:
+    except Exception:
         definition = 'Lookup failed'
         logging.info(response.stderr)
     return definition
@@ -162,7 +162,7 @@ def go():
         logging.exception('regex error: ' + query)
         error_str = str(error_message)
         error_state.set(error_str)
-    except:
+    except Exception:
         error_state = tk.StringVar()
         error_window = tk.Toplevel()
         error_window.title('Regex Error')
