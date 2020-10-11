@@ -8,7 +8,6 @@ from tkinter import *
 from datetime import datetime
 import logging
 
-
 home_path = os.path.expanduser('~/')
 word_file = home_path + 'word_lists/default.txt'
 text_font = "liberation sans"
@@ -22,11 +21,11 @@ winwidth = 1000
 rwinheight = 680
 winx = 100
 winy = 50
-rwiny = winy+ winheight + 40
+rwiny = winy + winheight + 40
 paddingh = 5
 paddingv = 5
-hint_text = "[abc] - one of the listed letters | . any character | * 0 or more | + 1 or more | ? optional | (a|b) a or b " \
-            "| \Z end of string"
+hint_text = "[abc] - one of the listed letters | . any character | * 0 or more | + 1 or more | ? optional | " \
+            "(a|b) a or b | \Z end of string"
 log_file = home_path + 'logs/tea-2' + datetime.now().strftime('%y-%m-%d') + '.txt'
 logging.basicConfig(filename=log_file, level=logging.INFO, format='%(asctime)s %(levelname)s %(message)s')
 punctuation = {33: None, 34: None, 39: None, 40: None, 41: None, 42: None, 44: None, 45: None, 58: None, 59: None,
@@ -35,6 +34,7 @@ match_word = []
 match_list = []
 hover_tip = []
 is_error = False
+
 
 def choose_list():
     global word_list, load_message
@@ -51,7 +51,7 @@ def load_list(filename):
         for line in input_file:
             temp_list.append(line[:-1])
     load_message = 'Using ' + os.path.basename(filename) + ' (' + str(len(temp_list)) + ' words).'
-    return (temp_list, load_message)
+    return temp_list, load_message
 
 
 def find_matches(query, list, min, max, ignore_punct, case_sense):
@@ -65,11 +65,11 @@ def find_matches(query, list, min, max, ignore_punct, case_sense):
         if not case_sense:
             j = j.lower()
         if query.match(j) and min <= len(j) <= max:
-                matches.append(i)
-                no_matches += 1
+            matches.append(i)
+            no_matches += 1
     end_time = datetime.now()
     time_taken = end_time - start_time
-    return (matches, no_matches, time_taken)
+    return matches, no_matches, time_taken
 
 
 def display_results(matches, no_matches, first, time_text, no_results_text):
@@ -77,7 +77,7 @@ def display_results(matches, no_matches, first, time_text, no_results_text):
     results_window = tk.Toplevel()
     results_window.title('Results')
     results_window['bg'] = bgcolour[theme]
-    results_window.geometry('%dx%d+%d+%d' % (winwidth, rwinheight, winx, rwiny ))
+    results_window.geometry('%dx%d+%d+%d' % (winwidth, rwinheight, winx, rwiny))
     results_window.grid_columnconfigure(0, weight=1)
     results_window.grid_columnconfigure(1, weight=1)
     results_window.grid_columnconfigure(2, weight=1)
@@ -87,9 +87,10 @@ def display_results(matches, no_matches, first, time_text, no_results_text):
     no_results_label = tk.Label(results_window, text=no_results_text, font=(text_font, text_size), bg=bgcolour[theme],
                                 fg=fgcolour[theme]).grid(row=10, column=2, columnspan=2, sticky='ew')
     definition_box = scrolledtext.ScrolledText(results_window, background=bgcolour[theme], relief=SOLID, borderwidth=1,
-                                           font=(text_font, text_size - 2), fg=fgcolour[theme], wrap='word', height=12)
+                                               font=(text_font, text_size - 2), fg=fgcolour[theme], wrap='word',
+                                               height=12)
     definition_box.grid(row=50, column=0, columnspan=4)
-    i=0
+    i = 0
     while i > len(match_word):
         match_word[i].grid_forget()
         i += 1
@@ -104,8 +105,8 @@ def display_results(matches, no_matches, first, time_text, no_results_text):
     while i <= last - first:
         column_no = int(i / 10)
         row_no = 20 + i - column_no * 10
-        match_word.append(tk.Button(results_window , text=matches[first + i], font=(text_font, text_size - 1),
-                                    command = lambda b= i: toggle(b)))
+        match_word.append(tk.Button(results_window, text=matches[first + i], font=(text_font, text_size - 1),
+                                    command=lambda b=i: toggle(b)))
         match_word[i].configure(anchor='w', relief='raised')
         match_word[i].grid(row=row_no, column=column_no, sticky='ew')
         i += 1
@@ -114,7 +115,7 @@ def display_results(matches, no_matches, first, time_text, no_results_text):
 def get_definition(word):
     try:
         response = subprocess.run(['dict', word, ], capture_output=True)
-        if len(response.stdout) >0:
+        if len(response.stdout) > 0:
             definition = response.stdout
         else:
             definition = 'No definitions found.'
@@ -155,33 +156,39 @@ def go():
         error_window = tk.Toplevel()
         error_window.title('Regex Error')
         error_window['bg'] = bgcolour[theme]
-        error_window.geometry('%dx%d+%d+%d' % (winwidth/4, winheight, winx+winwidth, winy))
+        error_window.geometry('%dx%d+%d+%d' % (winwidth / 4, winheight, winx + winwidth, winy))
         error_label = tk.Label(error_window, textvar=error_state, font=(text_font, text_size), bg=bgcolour[theme],
-                               fg='red', wraplength = (winwidth/4 - 10)).pack()
+                               fg='red', wraplength=(winwidth / 4 - 10)).pack()
         logging.exception('regex error: ' + query)
         error_str = str(error_message)
         error_state.set(error_str)
     except:
+        error_state = tk.StringVar()
+        error_window = tk.Toplevel()
+        error_window.title('Regex Error')
+        error_window['bg'] = bgcolour[theme]
+        error_window.geometry('%dx%d+%d+%d' % (winwidth / 4, winheight, winx + winwidth, winy))
+        error_label = tk.Label(error_window, textvar=error_state, font=(text_font, text_size), bg=bgcolour[theme],
+                               fg='red', wraplength=(winwidth / 4 - 10)).pack()
         logging.exception('other error')
         error_state.set('something else went wrong')
 
 
 def toggle(button_no):
     global match_word, definition_box
-    definition_box.delete(1.0,END)
+    definition_box.delete(1.0, END)
     if match_word[button_no].config('relief')[-1] == 'raised':
         match_word[button_no].config(relief="sunken")
         definition_text = get_definition(match_list[button_no])
-        definition_box.insert(1.0,definition_text)
-        i=0
+        definition_box.insert(1.0, definition_text)
+        i = 0
         while i < len(match_word):
             if i != button_no and match_word[i].config('relief')[-1] == 'sunken':
-                match_word[i].config(relief = 'raised')
+                match_word[i].config(relief='raised')
             i += 1
     else:
         print('sunken')
         match_word[button_no].config(relief="raised")
-
 
 
 root = tk.Tk()
@@ -197,7 +204,7 @@ root.grid_columnconfigure(2, weight=1)
 root.grid_columnconfigure(3, weight=1)
 load_button_message = tk.StringVar()
 load_button_message.set(load_message)
-load_message_button = tk.Button(root, textvar=load_button_message, font=(text_font, text_size-1), bg=buttonbg[theme],
+load_message_button = tk.Button(root, textvar=load_button_message, font=(text_font, text_size - 1), bg=buttonbg[theme],
                                 fg=fgcolour[theme], command=choose_list)
 load_message_button.grid(row=0, sticky='wn', column=0, columnspan=2, padx=paddingh, pady=paddingv)
 ignore_punctuation = tk.BooleanVar()
@@ -207,15 +214,15 @@ punctuation_checkbox = tk.Checkbutton(root, text='Ignore Punctuation', variable=
 punctuation_checkbox.grid(row=0, sticky='wn', column=3, padx=paddingh, pady=paddingv)
 case_sensitive = tk.BooleanVar()
 case_sensitive_checkbox = tk.Checkbutton(root, text='Case Sensitive', variable=case_sensitive, onvalue=True,
-                                      offvalue=False, font=(text_font, text_size), bg=bgcolour[theme],
-                                      fg=fgcolour[theme])
+                                         offvalue=False, font=(text_font, text_size), bg=bgcolour[theme],
+                                         fg=fgcolour[theme])
 case_sensitive_checkbox.grid(row=0, sticky='wn', column=2, padx=paddingh, pady=paddingv)
-prompt = tk.Label(root, text='Enter Regex query: ', font=(text_font, text_size), bg=bgcolour[theme], fg=fgcolour[theme]) \
-    .grid(row=1, column=0, padx=paddingh, pady=paddingv)
+prompt = tk.Label(root, text='Enter Regex query: ', font=(text_font, text_size), bg=bgcolour[theme], fg=fgcolour[theme])
+prompt.grid(row=1, column=0, padx=paddingh, pady=paddingv)
 input_query = tk.StringVar()
 query_entry = tk.Entry(root, textvariable=input_query, font=(text_font, text_size), bg=bgcolour[theme],
                        fg=fgcolour[theme])
-query_entry.grid(row=1, column=1, columnspan = 2, sticky='ew')
+query_entry.grid(row=1, column=1, columnspan=2, sticky='ew')
 query_entry.bind('<Return>', go_enter)
 enter_button = tk.Button(root, text="Go", font=(text_font, text_size), bg=buttonbg[theme], fg=fgcolour[theme],
                          command=go).grid(row=1, column=3, padx=paddingh, pady=paddingv, sticky='ew')
@@ -236,6 +243,5 @@ max_length_entry = tk.Entry(root, textvariable=max_length, font=(text_font, text
                             fg=fgcolour[theme]).grid(row=3, column=3, padx=paddingh, pady=paddingv, sticky='ew')
 hint_label = tk.Label(root, text=hint_text, font=(text_font, text_size - 2), bg=bgcolour[theme], fg=fgcolour[theme])
 hint_label.grid(row=4, sticky='wn', column=0, columnspan=4, padx=paddingh, pady=paddingv)
-
 
 root.mainloop()
