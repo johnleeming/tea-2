@@ -55,7 +55,6 @@ def load_list(filename):
 def find_matches(query, q_len, o_w, list, ignore_punct, case_sense):
     start_time = datetime.now()
     matches = []
-    no_matches = 0
     for i in list:
         if len(i) == q_len and i != o_w:
             j = i
@@ -63,15 +62,14 @@ def find_matches(query, q_len, o_w, list, ignore_punct, case_sense):
                 j = j.translate(punctuation)
             if not case_sense:
                 j = j.lower()
-            if query.match(j):
+            if query.match(j) and not j in matches:
                 matches.append(i)
-                no_matches += 1
     end_time = datetime.now()
     time_taken = (end_time - start_time).total_seconds()
-    return matches, no_matches, time_taken
+    return matches, time_taken
 
 
-def display_results(matches, no_matches, first, time_text, no_results_text):
+def display_results(matches, first, time_text, no_results_text):
     global match_word, definition_box, results_window
     results_window = tk.Toplevel()
     results_window.title('Results')
@@ -96,8 +94,8 @@ def display_results(matches, no_matches, first, time_text, no_results_text):
     match_word.clear()
     root.update()
     match_tip = []
-    if no_matches - first < 39:
-        last = no_matches - 1
+    if len(match_list) - first < 39:
+        last = len(match_list) - 1
     else:
         last = first + 39
     i = 0
@@ -140,7 +138,6 @@ def go():
     except Exception:
         pass
     start_no = 0
-    no_matches = 0
     search_time = 0
     match_list = []
     o_word = input_query.get()
@@ -159,10 +156,11 @@ def go():
             t_q = o_word[:i] + '.' + o_word[i+1:]
         try:
             re_query = re.compile(t_q)
-            t_match_list, t_no_matches, t_search_time = find_matches(re_query, query_word_length, o_word, word_list,
+            t_match_list, t_search_time = find_matches(re_query, query_word_length, o_word, word_list,
                                                                      ignore_punct, case_sensitivity)
-            match_list.extend(t_match_list)
-            no_matches += t_no_matches
+            for w in t_match_list:
+                if not w in match_list:
+                    match_list.append(w)
             search_time += t_search_time
         except re.error as error_message:
             error_state = tk.StringVar()
@@ -186,11 +184,11 @@ def go():
             logging.exception('other error')
             error_state.set('something else went wrong')
         i += 1
-    time_text = 'search took: ' + str(search_time) + ' seconds'
-    no_results_text = str(no_matches) + ' matches found'
-    if no_matches > 40:
+    time_text = 'search took: ' + str(round(search_time, 3)) + ' seconds'
+    no_results_text = str(len(match_list)) + ' matches found'
+    if len(match_list) > 40:
         no_results_text += ' (first 40 displayed)'
-    display_results(match_list, no_matches, start_no, time_text, no_results_text)
+    display_results(match_list, start_no, time_text, no_results_text)
 
 
 def toggle(button_no):
