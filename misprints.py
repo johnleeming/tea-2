@@ -24,7 +24,7 @@ winy = 50
 rwiny = winy + winheight + 40
 paddingh = 5
 paddingv = 5
-log_file = home_path + 'logs/tea-2' + datetime.now().strftime('%y-%m-%d') + '.log'
+log_file = home_path + 'logs/misprints.log'
 logging.basicConfig(filename=log_file, level=logging.INFO, format='%(asctime)s %(levelname)s %(message)s')
 punctuation = {33: None, 34: None, 39: None, 40: None, 41: None, 42: None, 44: None, 45: None, 58: None, 59: None,
                94: None, 95: None, 96: None}
