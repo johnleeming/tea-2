@@ -119,7 +119,7 @@ def get_definition(word):
         else:
             definition = 'No definitions found.'
         logging.debug(response.stderr)
-    except:
+    except Exception:
         definition = 'Lookup failed'
         logging.info(response.stderr)
     return definition
@@ -153,12 +153,11 @@ def go():
     while i < query_word_length:
         if i == 0:
             t_q = '.' + o_word[1:]
-        elif i == query_word_length -1:
+        elif i == query_word_length - 1:
             t_q = o_word[:i] + '.'
         else:
             t_q = o_word[:i] + '.' + o_word[i+1:]
         try:
-            print(t_q)
             re_query = re.compile(t_q)
             t_match_list, t_no_matches, t_search_time = find_matches(re_query, query_word_length, o_word, word_list,
                                                                      ignore_punct, case_sensitivity)
@@ -176,7 +175,7 @@ def go():
             logging.exception('regex error: ' + o_word)
             error_str = str(error_message)
             error_state.set(error_str)
-        except:
+        except Exception:
             error_state = tk.StringVar()
             error_window = tk.Toplevel()
             error_window.title('Regex Error')
