@@ -185,6 +185,7 @@ def go():
             error_state.set('something else went wrong')
         i += 1
     time_text = 'search took: ' + str(round(search_time, 3)) + ' seconds'
+    match_list.sort()
     no_results_text = str(len(match_list)) + ' matches found'
     if len(match_list) > 40:
         no_results_text += ' (first 40 displayed)'

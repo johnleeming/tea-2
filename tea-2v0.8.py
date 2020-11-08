@@ -150,6 +150,7 @@ def go():
         no_results_text = str(no_matches) + ' matches found'
         if no_matches > 40:
             no_results_text += ' (first 40 displayed)'
+        match_list.sort()
         display_results(match_list, no_matches, start_no, time_text, no_results_text)
     except re.error as error_message:
         error_state = tk.StringVar()
