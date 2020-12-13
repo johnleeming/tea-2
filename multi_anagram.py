@@ -190,20 +190,20 @@ def go():
     if error_message == '':
         i = 0
         while i < len(words_by_length[word_lengths[0]]):
-            print('l0 trying: ', words_by_length[word_lengths[0]][i], query_letter_counts)
+#            print('l0 trying: ', words_by_length[word_lengths[0]][i], query_letter_counts)
             possible_0, rd_0 = is_possible(words_by_length[word_lengths[0]][i], query_letter_counts)
-            print('lo answer: ', possible_0, rd_0)
+#            print('lo answer: ', possible_0, rd_0)
             if possible_0:
                 m_0 = words_by_length[word_lengths[0]][i]
                 if word_lengths[1] == word_lengths[0]:
                     j = i
                 else:
                     j = 0
-                print('m_o =', m_0, str(j), rd_0)
+#                print('m_o =', m_0, str(j), rd_0)
                 while j < len(words_by_length[word_lengths[1]]):
-                    print(m_0, 'l1 trying: ', words_by_length[word_lengths[1]][i], rd_0)
+#                    print(m_0, 'l1 trying: ', words_by_length[word_lengths[1]][i], rd_0)
                     possible_1, rd_1 = is_possible(words_by_length[word_lengths[1]][j], rd_0)
-                    print(m_0, j, 'l1 answer: ', possible_1, rd_1)
+#                    print(m_0, j, 'l1 answer: ', possible_1, rd_1)
                     if possible_1:
                         m_1 = words_by_length[word_lengths[1]][j]
                         if word_lengths[2] == word_lengths[1]:
@@ -211,22 +211,25 @@ def go():
                         else:
                             k = 0
                         while k < len(words_by_length[word_lengths[2]]):
-                            print('l2 trying: ', words_by_length[word_lengths[2]][i], rd_1)
+#                            print('l2 trying: ', words_by_length[word_lengths[2]][i], rd_1)
                             possible_2, rd_2 = is_possible(words_by_length[word_lengths[2]][k], rd_1)
-                            print('l2 answer: ', possible_2, rd_1)
+#                            print('l2 answer: ', possible_2, rd_1)
                             if possible_2:
                                 m_2 = words_by_length[word_lengths[1]][k]
-                                if word_lengths[3] == word_lengths[2]:
-                                    l = k
+                                if word_lengths[3] > 0:
+                                    if word_lengths[3] == word_lengths[2]:
+                                        l = k
+                                    else:
+                                        l = 0
+                                    while l < len(words_by_length[word_lengths[3]]):
+                                        possible_3, rd_3 = is_possible(words_by_length[word_lengths[3]][l], rd_2)
+                                        if possible_3:
+                                            m_3 = words_by_length[word_lengths[3]][l]
+                                            print(m_0, m_1, m_2, m_3)
+                                            match_list.append([m_0, m_1, m_2, m_3])
+                                        l += 1
                                 else:
-                                    l = 0
-                                while l < len(words_by_length[word_lengths[3]]):
-                                    possible_3, rd_3 = is_possible(words_by_length[word_lengths[3]][l], rd_2)
-                                    if possible_3:
-                                        m_3 = words_by_length[word_lengths[3]][l]
-                                        print(m_0, m_1, m_2, m_3)
-                                        match_list.append([m_0, m_1, m_2, m_3])
-                                    l += 1
+                                    match_list.append([m_0, m_1, m_2])
                             k += 1
                     j += 1
             i += 1
