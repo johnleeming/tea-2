@@ -137,9 +137,12 @@ def get_letter_counts(letters):
 
 
 def get_spares(residual_dict):
+    spares = '('
     for ltr in residual_dict:
-        if residual_dict(ltr) > 0:
-            spares = spares + ltr * residual_dict(ltr)
+        if residual_dict[ltr] > 0:
+            spares = spares + ltr * residual_dict[ltr]
+    spares = spares + ')'
+    return spares
 
 
 def get_definition(word):
@@ -196,20 +199,15 @@ def go():
     if error_message == '':
         i = 0
         while i < len(words_by_length[word_lengths[0]]):
-#            print('l0 trying: ', words_by_length[word_lengths[0]][i], query_letter_counts)
             possible_0, rd_0 = is_possible(words_by_length[word_lengths[0]][i], query_letter_counts)
-#            print('lo answer: ', possible_0, rd_0)
             if possible_0:
                 m_0 = words_by_length[word_lengths[0]][i]
                 if word_lengths[1] == word_lengths[0]:
                     j = i
                 else:
                     j = 0
-#                print('m_o =', m_0, str(j), rd_0)
                 while j < len(words_by_length[word_lengths[1]]):
-#                    print(m_0, 'l1 trying: ', words_by_length[word_lengths[1]][i], rd_0)
                     possible_1, rd_1 = is_possible(words_by_length[word_lengths[1]][j], rd_0)
-#                    print(m_0, j, 'l1 answer: ', possible_1, rd_1)
                     if possible_1:
                         m_1 = words_by_length[word_lengths[1]][j]
                         if word_lengths[2] > 0:
@@ -218,9 +216,7 @@ def go():
                             else:
                                 k = 0
                             while k < len(words_by_length[word_lengths[2]]):
-    #                            print('l2 trying: ', words_by_length[word_lengths[2]][i], rd_1)
                                 possible_2, rd_2 = is_possible(words_by_length[word_lengths[2]][k], rd_1)
-    #                            print('l2 answer: ', possible_2, rd_1)
                                 if possible_2:
                                     m_2 = words_by_length[word_lengths[1]][k]
                                     if word_lengths[3] > 0:
@@ -233,13 +229,13 @@ def go():
                                             if possible_3:
                                                 m_3 = words_by_length[word_lengths[3]][l]
                                                 print(m_0, m_1, m_2, m_3)
-                                                match_list.append([m_0, m_1, m_2, m_3])
+                                                match_list.append([m_0, m_1, m_2, m_3, get_spares(rd_3)])
                                             l += 1
                                     else:
-                                        match_list.append([m_0, m_1, m_2])
+                                        match_list.append([m_0, m_1, m_2, get_spares(rd_2)])
                                 k += 1
                         else:
-                            match_list.append([m_0,m_1])
+                            match_list.append([m_0, m_1, get_spares(rd_1)])
                     j += 1
             i += 1
         print(match_list)
