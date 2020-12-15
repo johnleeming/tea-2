@@ -24,8 +24,9 @@ winy = 50
 rwiny = winy + winheight + 40
 paddingh = 5
 paddingv = 5
-log_file = home_path + 'logs/misprints.log'
+log_file = home_path + 'logs/multi_anagram.log'
 logging.basicConfig(filename=log_file, level=logging.INFO, format='%(asctime)s %(levelname)s %(message)s')
+output_file = home_path + 'answers.txt'
 punctuation = {33: None, 34: None, 39: None, 40: None, 41: None, 42: None, 44: None, 45: None, 58: None, 59: None,
                94: None, 95: None, 96: None}
 match_word = []
@@ -194,6 +195,7 @@ def go():
     else:
         while len(word_lengths) < 4:
             word_lengths.append(0)
+    print(word_lengths)
     if sum(word_lengths) > len(letter_list):
         error_message = error_message + 'Not enough letters.'
     if error_message == '':
@@ -218,6 +220,7 @@ def go():
                             while k < len(words_by_length[word_lengths[2]]):
                                 possible_2, rd_2 = is_possible(words_by_length[word_lengths[2]][k], rd_1)
                                 if possible_2:
+                                    print(k)
                                     m_2 = words_by_length[word_lengths[1]][k]
                                     if word_lengths[3] > 0:
                                         if word_lengths[3] == word_lengths[2]:
@@ -246,6 +249,10 @@ def go():
     no_results_text = str(len(match_list)) + ' matches found'
     if len(match_list) > 40:
         no_results_text += ' (first 40 displayed)'
+    if len(match_list) > 0
+        with open(output_file, 'w') as out:
+            for n in match_list:
+                out.writelines(n + '\n')
     display_results(match_list, start_no, time_text, no_results_text)
 
 
