@@ -195,7 +195,6 @@ def go():
     else:
         while len(word_lengths) < 4:
             word_lengths.append(0)
-    print(word_lengths)
     if sum(word_lengths) > len(letter_list):
         error_message = error_message + 'Not enough letters.'
     if error_message == '':
@@ -249,10 +248,10 @@ def go():
     no_results_text = str(len(match_list)) + ' matches found'
     if len(match_list) > 40:
         no_results_text += ' (first 40 displayed)'
-    if len(match_list) > 0
+    if len(match_list) > 0:
         with open(output_file, 'w') as out:
             for n in match_list:
-                out.writelines(n + '\n')
+                out.writelines(str(n) + '\n')
     display_results(match_list, start_no, time_text, no_results_text)
 
 
