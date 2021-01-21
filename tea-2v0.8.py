@@ -26,7 +26,7 @@ paddingh = 5
 paddingv = 5
 hint_text = "[abc] - one of the listed letters | . any character | * 0 or more | + 1 or more | ? optional | " \
             "(a|b) a or b | \Z end of string"
-log_file = home_path + 'logs/tea-2' + datetime.now().strftime('%y-%m-%d') + '.txt'
+log_file = home_path + 'logs/tea-2.log'
 logging.basicConfig(filename=log_file, level=logging.INFO, format='%(asctime)s %(levelname)s %(message)s')
 punctuation = {33: None, 34: None, 39: None, 40: None, 41: None, 42: None, 44: None, 45: None, 58: None, 59: None,
                94: None, 95: None, 96: None}
@@ -74,6 +74,10 @@ def find_matches(query, list, min, max, ignore_punct, case_sense):
 
 def display_results(matches, no_matches, first, time_text, no_results_text):
     global match_word, definition_box, results_window
+    try:
+        results_window.destroy()
+    except:
+        pass
     results_window = tk.Toplevel()
     results_window.title('Results')
     results_window['bg'] = bgcolour[theme]
