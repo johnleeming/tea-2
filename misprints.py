@@ -30,7 +30,6 @@ punctuation = {33: None, 34: None, 39: None, 40: None, 41: None, 42: None, 44: N
                94: None, 95: None, 96: None}
 match_word = []
 match_list = []
-hover_tip = []
 is_error = False
 
 
@@ -62,7 +61,7 @@ def find_matches(query, q_len, o_w, list, ignore_punct, case_sense):
                 j = j.translate(punctuation)
             if not case_sense:
                 j = j.lower()
-            if query.match(j) and not j in matches:
+            if query.match(j) and i not in matches:
                 matches.append(i)
     end_time = datetime.now()
     time_taken = (end_time - start_time).total_seconds()
@@ -80,9 +79,11 @@ def display_results(matches, first, time_text, no_results_text):
     results_window.grid_columnconfigure(2, weight=1)
     results_window.grid_columnconfigure(3, weight=1)
     solution_time_label = tk.Label(results_window, text=time_text, font=(text_font, text_size), bg=bgcolour[theme],
-                                   fg=fgcolour[theme]).grid(row=10, column=0, columnspan=2, sticky='ew')
+                                   fg=fgcolour[theme])
+    solution_time_label.grid(row=10, column=0, columnspan=2, sticky='ew')
     no_results_label = tk.Label(results_window, text=no_results_text, font=(text_font, text_size), bg=bgcolour[theme],
-                                fg=fgcolour[theme]).grid(row=10, column=2, columnspan=2, sticky='ew')
+                                fg=fgcolour[theme])
+    no_results_label.grid(row=10, column=2, columnspan=2, sticky='ew')
     definition_box = scrolledtext.ScrolledText(results_window, background=bgcolour[theme], relief=SOLID, borderwidth=1,
                                                font=(text_font, text_size - 2), fg=fgcolour[theme], wrap='word',
                                                height=12)
@@ -93,7 +94,6 @@ def display_results(matches, first, time_text, no_results_text):
         i += 1
     match_word.clear()
     root.update()
-    match_tip = []
     if len(match_list) - first < 39:
         last = len(match_list) - 1
     else:
@@ -157,9 +157,9 @@ def go():
         try:
             re_query = re.compile(t_q)
             t_match_list, t_search_time = find_matches(re_query, query_word_length, o_word, word_list,
-                                                                     ignore_punct, case_sensitivity)
+                                                       ignore_punct, case_sensitivity)
             for w in t_match_list:
-                if not w in match_list:
+                if w not in match_list:
                     match_list.append(w)
             search_time += t_search_time
         except re.error as error_message:

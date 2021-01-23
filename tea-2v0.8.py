@@ -32,7 +32,6 @@ punctuation = {33: None, 34: None, 39: None, 40: None, 41: None, 42: None, 44: N
                94: None, 95: None, 96: None}
 match_word = []
 match_list = []
-hover_tip = []
 is_error = False
 
 
@@ -76,7 +75,7 @@ def display_results(matches, no_matches, first, time_text, no_results_text):
     global match_word, definition_box, results_window
     try:
         results_window.destroy()
-    except:
+    except Exception:
         pass
     results_window = tk.Toplevel()
     results_window.title('Results')
@@ -87,9 +86,11 @@ def display_results(matches, no_matches, first, time_text, no_results_text):
     results_window.grid_columnconfigure(2, weight=1)
     results_window.grid_columnconfigure(3, weight=1)
     solution_time_label = tk.Label(results_window, text=time_text, font=(text_font, text_size), bg=bgcolour[theme],
-                                   fg=fgcolour[theme]).grid(row=10, column=0, columnspan=2, sticky='ew')
+                                   fg=fgcolour[theme])
+    solution_time_label.grid(row=10, column=0, columnspan=2, sticky='ew')
     no_results_label = tk.Label(results_window, text=no_results_text, font=(text_font, text_size), bg=bgcolour[theme],
-                                fg=fgcolour[theme]).grid(row=10, column=2, columnspan=2, sticky='ew')
+                                fg=fgcolour[theme])
+    no_results_label.grid(row=10, column=2, columnspan=2, sticky='ew')
     definition_box = scrolledtext.ScrolledText(results_window, background=bgcolour[theme], relief=SOLID, borderwidth=1,
                                                font=(text_font, text_size - 2), fg=fgcolour[theme], wrap='word',
                                                height=12)
@@ -100,7 +101,6 @@ def display_results(matches, no_matches, first, time_text, no_results_text):
         i += 1
     match_word.clear()
     root.update()
-    match_tip = []
     if no_matches - first < 39:
         last = no_matches - 1
     else:
