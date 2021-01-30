@@ -16,7 +16,7 @@ bgcolour = {'dark': 'black', 'light': 'white', 'alarm': 'red'}
 fgcolour = {'dark': 'white', 'light': 'black', 'alarm': 'black'}
 buttonbg = {'dark': 'darkgrey', 'light': 'lightgrey', 'alarm': 'darkgrey'}
 theme = 'light'
-winheight = 180
+winheight = 215
 winwidth = 1000
 rwinheight = 680
 winx = 100
@@ -50,14 +50,29 @@ def load_list(filename):
         for line in input_file:
             temp_list.append(line[:-1])
     load_message = 'Using ' + os.path.basename(filename) + ' (' + str(len(temp_list)) + ' words).'
+    temp_list.sort()
     return temp_list, load_message
 
 
-def find_matches(query, list, min, max, ignore_punct, case_sense):
+def check_word(list, word):
+    try:
+        ind = list.index(word)
+    except Exception:
+        ind = -1
+    return ind
+
+
+def find_matches(query, list, min, max, ignore_punct, case_sense, start, end):
     start_time = datetime.now()
     matches = []
     no_matches = 0
-    for i in list:
+    if start == -1:
+        start = 0
+    if end == -1:
+        end = len(list)
+    k = start
+    while k < end:
+        i = list[k]
         j = i
         if ignore_punct:
             j = j.translate(punctuation)
@@ -66,6 +81,7 @@ def find_matches(query, list, min, max, ignore_punct, case_sense):
         if query.match(j) and min <= len(j) <= max:
             matches.append(i)
             no_matches += 1
+        k += 1
     end_time = datetime.now()
     time_taken = end_time - start_time
     return matches, no_matches, time_taken
@@ -134,6 +150,18 @@ def go_enter(event):
     go()
 
 
+def display_error(error_message):
+    error_state = tk.StringVar()
+    error_window = tk.Toplevel()
+    error_window.title('Error')
+    error_window['bg'] = bgcolour[theme]
+    error_window.geometry('%dx%d+%d+%d' % (winwidth / 4, winheight, winx + winwidth, winy))
+    error_label = tk.Label(error_window, textvar=error_state, font=(text_font, text_size), bg=bgcolour[theme],
+                           fg='red', wraplength=(winwidth / 4 - 10)).pack()
+    logging.exception(error_message)
+    error_state.set(error_message)
+
+
 def go():
     start_no = 0
     global match_list, results_window
@@ -142,6 +170,14 @@ def go():
     query = input_query.get()
     min_len = min_length.get()
     max_len = max_length.get()
+    a_start = alpha_start.get()
+    start_ind = check_word(word_list, a_start)
+    if a_start != '' and start_ind == -1:
+        display_error('Start word not in list, will start from beginning.')
+    a_end = alpha_end.get()
+    end_ind = check_word(word_list, a_end)
+    if a_end != '' and end_ind == -1:
+        display_error('End word not in list, will continue to end.')
     ignore_punct = ignore_punctuation.get()
     case_sensitivity = case_sensitive.get()
     if not case_sensitivity:
@@ -149,7 +185,7 @@ def go():
     try:
         re_query = re.compile(query)
         match_list, no_matches, search_time = find_matches(re_query, word_list, min_len, max_len, ignore_punct,
-                                                           case_sensitivity)
+                                                           case_sensitivity, start_ind, end_ind)
         time_text = 'search took: ' + str(search_time.total_seconds()) + ' seconds'
         no_results_text = str(no_matches) + ' matches found'
         if no_matches > 40:
@@ -157,26 +193,9 @@ def go():
         match_list.sort()
         display_results(match_list, no_matches, start_no, time_text, no_results_text)
     except re.error as error_message:
-        error_state = tk.StringVar()
-        error_window = tk.Toplevel()
-        error_window.title('Regex Error')
-        error_window['bg'] = bgcolour[theme]
-        error_window.geometry('%dx%d+%d+%d' % (winwidth / 4, winheight, winx + winwidth, winy))
-        error_label = tk.Label(error_window, textvar=error_state, font=(text_font, text_size), bg=bgcolour[theme],
-                               fg='red', wraplength=(winwidth / 4 - 10)).pack()
-        logging.exception('regex error: ' + query)
-        error_str = str(error_message)
-        error_state.set(error_str)
+        display_error(error_message)
     except Exception:
-        error_state = tk.StringVar()
-        error_window = tk.Toplevel()
-        error_window.title('Regex Error')
-        error_window['bg'] = bgcolour[theme]
-        error_window.geometry('%dx%d+%d+%d' % (winwidth / 4, winheight, winx + winwidth, winy))
-        error_label = tk.Label(error_window, textvar=error_state, font=(text_font, text_size), bg=bgcolour[theme],
-                               fg='red', wraplength=(winwidth / 4 - 10)).pack()
-        logging.exception('other error')
-        error_state.set('something else went wrong')
+        display_error('Something went wrong.')
 
 
 def toggle(button_no):
@@ -231,22 +250,37 @@ query_entry.grid(row=1, column=1, columnspan=2, sticky='ew')
 query_entry.bind('<Return>', go_enter)
 enter_button = tk.Button(root, text="Go", font=(text_font, text_size), bg=buttonbg[theme], fg=fgcolour[theme],
                          command=go).grid(row=1, column=3, padx=paddingh, pady=paddingv, sticky='ew')
+hint_label = tk.Label(root, text=hint_text, font=(text_font, text_size - 2), bg=bgcolour[theme], fg=fgcolour[theme])
+hint_label.grid(row=3, sticky='wn', column=0, columnspan=4, padx=paddingh, pady=paddingv)
 min_length_label = tk.Label(root, text='Minimum length: ', font=(text_font, text_size), bg=bgcolour[theme],
                             fg=fgcolour[theme])
-min_length_label.grid(row=3, column=0, padx=paddingh, pady=paddingv, sticky='ew')
+min_length_label.grid(row=4, column=0, padx=paddingh, pady=paddingv, sticky='ew')
 min_length = tk.IntVar()
 min_length.set(3)
 min_length_entry = tk.Entry(root, textvariable=min_length, font=(text_font, text_size), bg=bgcolour[theme],
                             fg=fgcolour[theme])
-min_length_entry.grid(row=3, column=1, padx=paddingh, pady=paddingv, sticky='ew')
+min_length_entry.grid(row=4, column=1, padx=paddingh, pady=paddingv, sticky='ew')
 max_length_label = tk.Label(root, text='Maximum length: ', font=(text_font, text_size), bg=bgcolour[theme],
                             fg=fgcolour[theme])
-max_length_label.grid(row=3, column=2, padx=paddingh, pady=paddingv, sticky='ew')
+max_length_label.grid(row=4, column=2, padx=paddingh, pady=paddingv, sticky='ew')
 max_length = tk.IntVar()
 max_length.set(12)
 max_length_entry = tk.Entry(root, textvariable=max_length, font=(text_font, text_size), bg=bgcolour[theme],
-                            fg=fgcolour[theme]).grid(row=3, column=3, padx=paddingh, pady=paddingv, sticky='ew')
-hint_label = tk.Label(root, text=hint_text, font=(text_font, text_size - 2), bg=bgcolour[theme], fg=fgcolour[theme])
-hint_label.grid(row=4, sticky='wn', column=0, columnspan=4, padx=paddingh, pady=paddingv)
+                            fg=fgcolour[theme])
+max_length_entry.grid(row=4, column=3, padx=paddingh, pady=paddingv, sticky='ew')
+alpha_start_label = tk.Label(root, text='Alphabetic start: ', font=(text_font, text_size), bg=bgcolour[theme],
+                             fg=fgcolour[theme])
+alpha_start_label.grid(row=5, column=0, padx=paddingh, pady=paddingv, sticky='ew')
+alpha_start = tk.StringVar()
+alpha_start_entry = tk.Entry(root, textvariable=alpha_start, font=(text_font, text_size), bg=bgcolour[theme],
+                             fg=fgcolour[theme])
+alpha_start_entry.grid(row=5, column=1, padx=paddingh, pady=paddingv, sticky='ew')
+alpha_end_label = tk.Label(root, text='Alphabetic End: ', font=(text_font, text_size), bg=bgcolour[theme],
+                           fg=fgcolour[theme])
+alpha_end_label.grid(row=5, column=2, padx=paddingh, pady=paddingv, sticky='ew')
+alpha_end = tk.StringVar()
+alpha_end_entry = tk.Entry(root, textvariable=alpha_end, font=(text_font, text_size), bg=bgcolour[theme],
+                           fg=fgcolour[theme])
+alpha_end_entry.grid(row=5, column=3, padx=paddingh, pady=paddingv, sticky='ew')
 
 root.mainloop()
