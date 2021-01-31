@@ -11,17 +11,17 @@ import logging
 home_path = os.path.expanduser('~/')
 word_file = home_path + 'word_lists/default.txt'
 text_font = "liberation sans"
-text_size = 16
+text_size = 14
 bgcolour = {'dark': 'black', 'light': 'white', 'alarm': 'red'}
 fgcolour = {'dark': 'white', 'light': 'black', 'alarm': 'black'}
 buttonbg = {'dark': 'darkgrey', 'light': 'lightgrey', 'alarm': 'darkgrey'}
 theme = 'light'
-winheight = 255
+winheight = 15 * text_size + 20
 winwidth = 1000
-rwinheight = 600
+rwinheight = 850 - winheight
 winx = 100
-winy = 40
-rwiny = winy + winheight + 40
+winy = 0
+rwiny = winy + winheight + 65
 paddingh = 5
 paddingv = 5
 hint_text = "[abc] - one of the listed letters | . any character | * 0 or more | + 1 or more | ? optional | " \
@@ -107,7 +107,7 @@ def display_results(matches, no_matches, first, time_text, no_results_text):
     no_results_label.grid(row=10, column=2, columnspan=2, sticky='ew')
     definition_box = scrolledtext.ScrolledText(results_window, background=bgcolour[theme], relief=SOLID, borderwidth=1,
                                                font=(text_font, text_size - 2), fg=fgcolour[theme], wrap='word',
-                                               height=12)
+                                               height=12, width=100)
     definition_box.grid(row=50, column=0, columnspan=4)
     i = 0
     while i > len(match_word):
