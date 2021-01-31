@@ -25,7 +25,7 @@ rwiny = winy + winheight + 40
 paddingh = 5
 paddingv = 5
 hint_text = "[abc] - one of the listed letters | . any character | * 0 or more | + 1 or more | ? optional | " \
-            "(a|b) a or b | \Z end of string"
+            "(a|b) a or b | $ end of string"
 log_file = home_path + 'logs/tea-2.log'
 logging.basicConfig(filename=log_file, level=logging.INFO, format='%(asctime)s %(levelname)s %(message)s')
 punctuation = {33: None, 34: None, 39: None, 40: None, 41: None, 42: None, 44: None, 45: None, 58: None, 59: None,
@@ -50,7 +50,7 @@ def load_list(filename):
         for line in input_file:
             temp_list.append(line[:-1])
     load_message = 'Using ' + os.path.basename(filename) + ' (' + str(len(temp_list)) + ' words).'
-    temp_list.sort()
+    temp_list.sort(key = lambda x: x.lower())
     return temp_list, load_message
 
 
@@ -89,10 +89,6 @@ def find_matches(query, list, min, max, ignore_punct, case_sense, start, end):
 
 def display_results(matches, no_matches, first, time_text, no_results_text):
     global match_word, definition_box, results_window
-    try:
-        results_window.destroy()
-    except Exception:
-        pass
     results_window = tk.Toplevel()
     results_window.title('Results')
     results_window['bg'] = bgcolour[theme]
@@ -164,7 +160,15 @@ def display_error(error_message):
 
 def go():
     start_no = 0
-    global match_list, results_window
+    global match_list, results_window, error_window
+    try:
+        results_window.destroy()
+    except Exception:
+        pass
+    try:
+        error_window.destroy()
+    except Exception:
+        pass
     if len(match_list) > 0:
         results_window.destroy()
     query = input_query.get()
@@ -236,6 +240,7 @@ punctuation_checkbox = tk.Checkbutton(root, text='Ignore Punctuation', variable=
                                       offvalue=False, font=(text_font, text_size), bg=bgcolour[theme],
                                       fg=fgcolour[theme])
 punctuation_checkbox.grid(row=0, sticky='wn', column=3, padx=paddingh, pady=paddingv)
+punctuation_checkbox.select()
 case_sensitive = tk.BooleanVar()
 case_sensitive_checkbox = tk.Checkbutton(root, text='Case Sensitive', variable=case_sensitive, onvalue=True,
                                          offvalue=False, font=(text_font, text_size), bg=bgcolour[theme],
