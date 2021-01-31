@@ -16,11 +16,11 @@ bgcolour = {'dark': 'black', 'light': 'white', 'alarm': 'red'}
 fgcolour = {'dark': 'white', 'light': 'black', 'alarm': 'black'}
 buttonbg = {'dark': 'darkgrey', 'light': 'lightgrey', 'alarm': 'darkgrey'}
 theme = 'light'
-winheight = 215
+winheight = 255
 winwidth = 1000
-rwinheight = 680
+rwinheight = 600
 winx = 100
-winy = 50
+winy = 40
 rwiny = winy + winheight + 40
 paddingh = 5
 paddingv = 5
@@ -50,7 +50,7 @@ def load_list(filename):
         for line in input_file:
             temp_list.append(line[:-1])
     load_message = 'Using ' + os.path.basename(filename) + ' (' + str(len(temp_list)) + ' words).'
-    temp_list.sort(key = lambda x: x.lower())
+    temp_list.sort(key=lambda x: x.lower())
     return temp_list, load_message
 
 
@@ -62,13 +62,13 @@ def check_word(list, word):
     return ind
 
 
-def find_matches(query, list, min, max, ignore_punct, case_sense, start, end):
+def find_matches(query, list, min, max, ignore_punct, case_sense, start, end, n_words):
     start_time = datetime.now()
     matches = []
     no_matches = 0
-    if start == -1:
+    if start == -1:  # if nothing entered in start field, start from beginning
         start = 0
-    if end == -1:
+    if end == -1:  # if nothing entered in end field continue to end
         end = len(list)
     k = start
     while k < end:
@@ -78,9 +78,11 @@ def find_matches(query, list, min, max, ignore_punct, case_sense, start, end):
             j = j.translate(punctuation)
         if not case_sense:
             j = j.lower()
-        if query.match(j) and min <= len(j) <= max:
-            matches.append(i)
-            no_matches += 1
+        words_in_i = i.count(' ') + 1
+        if query.match(j) and (min <= len(j) <= max):
+            if words_in_i == int(n_words):
+                matches.append(i)
+                no_matches += 1
         k += 1
     end_time = datetime.now()
     time_taken = end_time - start_time
@@ -142,10 +144,6 @@ def get_definition(word):
     return definition
 
 
-def go_enter(event):
-    go()
-
-
 def display_error(error_message):
     error_state = tk.StringVar()
     error_window = tk.Toplevel()
@@ -156,6 +154,10 @@ def display_error(error_message):
                            fg='red', wraplength=(winwidth / 4 - 10)).pack()
     logging.exception(error_message)
     error_state.set(error_message)
+
+
+def go_enter(event):
+    go()
 
 
 def go():
@@ -169,13 +171,13 @@ def go():
         error_window.destroy()
     except Exception:
         pass
-    if len(match_list) > 0:
-        results_window.destroy()
     query = input_query.get()
     min_len = min_length.get()
     max_len = max_length.get()
     a_start = alpha_start.get()
     start_ind = check_word(word_list, a_start)
+    n_words = num_words.get()
+    print(n_words)
     if a_start != '' and start_ind == -1:
         display_error('Start word not in list, will start from beginning.')
     a_end = alpha_end.get()
@@ -189,7 +191,7 @@ def go():
     try:
         re_query = re.compile(query)
         match_list, no_matches, search_time = find_matches(re_query, word_list, min_len, max_len, ignore_punct,
-                                                           case_sensitivity, start_ind, end_ind)
+                                                           case_sensitivity, start_ind, end_ind, n_words)
         time_text = 'search took: ' + str(search_time.total_seconds()) + ' seconds'
         no_results_text = str(no_matches) + ' matches found'
         if no_matches > 40:
@@ -287,5 +289,11 @@ alpha_end = tk.StringVar()
 alpha_end_entry = tk.Entry(root, textvariable=alpha_end, font=(text_font, text_size), bg=bgcolour[theme],
                            fg=fgcolour[theme])
 alpha_end_entry.grid(row=5, column=3, padx=paddingh, pady=paddingv, sticky='ew')
+num_words_label = tk.Label(root, text='Number of words:', font=(text_font, text_size), bg=bgcolour[theme],
+                           fg=fgcolour[theme])
+num_words_label.grid(row=6, column=0, padx=paddingh, pady=paddingv, sticky='ew')
+num_words = tk.IntVar(value=1)
+num_words = tk.Entry(root, textvariable=num_words, font=(text_font, text_size), bg=bgcolour[theme], fg=fgcolour[theme])
+num_words.grid(row=6, column=1, padx=paddingh, pady=paddingv, sticky='ew')
 
 root.mainloop()
