@@ -205,14 +205,12 @@ def toggle(button_no):
                 match_word[i].config(relief='raised')
             i += 1
     else:
-        print('sunken')
         match_word[button_no].config(relief="raised")
 
 
 root = tk.Tk()
 
 word_list, load_message = load_list(word_file)
-print(load_message)
 root.title('Misprint Search')
 root['bg'] = bgcolour[theme]
 root.geometry('%dx%d+%d+%d' % (winwidth, winheight, winx, winy))

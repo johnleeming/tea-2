@@ -219,7 +219,6 @@ def go():
                             while k < len(words_by_length[word_lengths[2]]):
                                 possible_2, rd_2 = is_possible(words_by_length[word_lengths[2]][k], rd_1)
                                 if possible_2:
-                                    print(k)
                                     m_2 = words_by_length[word_lengths[1]][k]
                                     if word_lengths[3] > 0:
                                         if word_lengths[3] == word_lengths[2]:

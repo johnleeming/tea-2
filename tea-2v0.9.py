@@ -177,7 +177,6 @@ def go():
     a_start = alpha_start.get()
     start_ind = check_word(word_list, a_start)
     n_words = num_words.get()
-    print(n_words)
     if a_start != '' and start_ind == -1:
         display_error('Start word not in list, will start from beginning.')
     a_end = alpha_end.get()
@@ -217,14 +216,12 @@ def toggle(button_no):
                 match_word[i].config(relief='raised')
             i += 1
     else:
-        print('sunken')
         match_word[button_no].config(relief="raised")
 
 
 root = tk.Tk()
 
 word_list, load_message = load_list(word_file)
-print(load_message)
 root.title('Regex-based Word Search')
 root['bg'] = bgcolour[theme]
 root.geometry('%dx%d+%d+%d' % (winwidth, winheight, winx, winy))
