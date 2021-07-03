@@ -67,7 +67,14 @@ def check_word(list, word):
     return ind
 
 
-def find_matches(query, list, min, max, ignore_punct, case_sense, start, end, n_words):
+def contains_greek_character(w):
+    for gr_ch in greek_character_names:
+        if gr_ch in w:
+            return True
+    return False
+
+
+def find_matches(query, list, min, max, ignore_punct, case_sense, start, end, n_words, c_gr_ch):
     start_time = datetime.now()
     matches = []
     no_matches = 0
@@ -86,19 +93,17 @@ def find_matches(query, list, min, max, ignore_punct, case_sense, start, end, n_
         words_in_i = i.count(' ') + 1
         if query.match(j) and (min <= len(j) <= max):
             if words_in_i == int(n_words):
-                matches.append(i)
-                no_matches += 1
+                if c_gr_ch:
+                    if contains_greek_character(j):
+                        matches.append(i)
+                        no_matches += 1
+                else:
+                    matches.append(i)
+                    no_matches += 1
         k += 1
     end_time = datetime.now()
     time_taken = end_time - start_time
     return matches, no_matches, time_taken
-
-
-def contains_greek_character(w):
-    for gr_ch in greek_character_names:
-        if gr_ch in w:
-            return True
-    return False
 
 
 def display_results(matches, no_matches, first, time_text, no_results_text):
@@ -197,12 +202,14 @@ def go():
         display_error('End word not in list, will continue to end.')
     ignore_punct = ignore_punctuation.get()
     case_sensitivity = case_sensitive.get()
+    contains_gr_ch = contains_greek_char.get()
     if not case_sensitivity:
         query = query.lower()
     try:
         re_query = re.compile(query)
         match_list, no_matches, search_time = find_matches(re_query, word_list, min_len, max_len, ignore_punct,
-                                                           case_sensitivity, start_ind, end_ind, n_words)
+                                                           case_sensitivity, start_ind, end_ind, n_words,
+                                                           contains_gr_ch)
         time_text = 'search took: ' + str(search_time.total_seconds()) + ' seconds'
         no_results_text = str(no_matches) + ' matches found'
         if no_matches > 40:
@@ -304,5 +311,9 @@ num_words_label.grid(row=6, column=0, padx=paddingh, pady=paddingv, sticky='ew')
 num_words = tk.IntVar(value=1)
 num_words = tk.Entry(root, textvariable=num_words, font=(text_font, text_size), bg=bgcolour[theme], fg=fgcolour[theme])
 num_words.grid(row=6, column=1, padx=paddingh, pady=paddingv, sticky='ew')
-
+contains_greek_char = tk.BooleanVar()
+contains_greek_char_checkbox = tk.Checkbutton(root, text='Contains Greek', variable=contains_greek_char, onvalue=True,
+                                              offvalue=False, font=(text_font, text_size), bg=bgcolour[theme],
+                                              fg=fgcolour[theme])
+contains_greek_char_checkbox.grid(row=6, sticky='wn', column=2, padx=paddingh, pady=paddingv)
 root.mainloop()
