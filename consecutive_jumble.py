@@ -70,7 +70,8 @@ def find_matches(seq, lng):
         s = sorted(seq[i:i + lng])
         for w in words_by_length[lng]:
             if s == sorted(w):
-                mtchs.append(w)
+                if w not in mtchs:
+                    mtchs.append(w)
     return mtchs
 
 
