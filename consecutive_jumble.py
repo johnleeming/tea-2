@@ -64,26 +64,14 @@ def split_words_by_length(words):
     return word_lists_by_length
 
 
-def is_possible(w, l_dict):
-    temp_letter_counts = l_dict.copy()
-    poss = True
-    i = 0
-    while i < len(w):
-        let = w[i]
-        if let not in temp_letter_counts:
-            poss = False
-        else:
-            if temp_letter_counts[let] == 0:
-                poss = False
-            temp_letter_counts[let] -= 1
-        if not poss:
-            break
-        i += 1
-    if poss:
-        return_dict = temp_letter_counts.copy()
-    else:
-        return_dict = l_dict.copy()
-    return poss, return_dict
+def find_matches(seq, lng):
+    mtchs = []
+    for i in range(0,len(seq)-lng):
+        s = sorted(seq[i:i + lng])
+        for w in words_by_length[lng]:
+            if s == sorted(w):
+                mtchs.append(w)
+    return mtchs
 
 
 def display_results(matches, first, time_text, no_results_text):
@@ -127,25 +115,6 @@ def display_results(matches, first, time_text, no_results_text):
         i += 1
 
 
-def get_letter_counts(letters):
-    counts = {}
-    for letter in letters:
-        if letter in counts:
-            counts[letter] += 1
-        else:
-            counts[letter] = 1
-    return counts
-
-
-def get_spares(residual_dict):
-    spares = '('
-    for ltr in residual_dict:
-        if residual_dict[ltr] > 0:
-            spares = spares + ltr * residual_dict[ltr]
-    spares = spares + ')'
-    return spares
-
-
 def get_definition(word):
     try:
         response = subprocess.run(['dict', word, ], capture_output=True)
@@ -187,7 +156,7 @@ def go():
     if word_len > len(letter_sequence):
         error_message = error_message + 'Not enough letters.'
     if error_message == '':
-        ###
+        match_list = find_matches(letter_sequence, word_len)
         print(match_list)
     else:
         print(error_message)
