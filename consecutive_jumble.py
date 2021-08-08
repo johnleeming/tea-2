@@ -228,7 +228,7 @@ prompt_2.grid(row=2, column=0, padx=paddingh, pady=paddingv)
 input_query = tk.StringVar()
 query_entry = tk.Entry(root, textvariable=input_query, font=(text_font, text_size), bg=bgcolour[theme],
                        fg=fgcolour[theme])
-query_entry.grid(row=1, column=1, columnspan=2, sticky='ew')
+query_entry.grid(row=1, column=1, columnspan=3, sticky='ew')
 query_entry.bind('<Return>', go_enter)
 word_length = tk.IntVar(value=4)
 word_length_entry = tk.Entry(root, textvariable=word_length, font=(text_font, text_size), bg=bgcolour[theme],
@@ -236,7 +236,7 @@ word_length_entry = tk.Entry(root, textvariable=word_length, font=(text_font, te
 word_length_entry.grid(row=2, column=1, columnspan=2, sticky='ew')
 word_length_entry.bind('<Return>', go_enter)
 enter_button = tk.Button(root, text="Go", font=(text_font, text_size), bg=buttonbg[theme], fg=fgcolour[theme],
-                         command=go).grid(row=1, column=3, padx=paddingh, pady=paddingv, sticky='ew')
+                         command=go).grid(row=2, column=3, padx=paddingh, pady=paddingv, sticky='ew')
 
 
 root.mainloop()
