@@ -66,7 +66,7 @@ def split_words_by_length(words):
 
 def find_matches(seq, lng):
     mtchs = []
-    for i in range(0,len(seq)-lng):
+    for i in range(0,len(seq)-lng + 1):
         s = sorted(seq[i:i + lng])
         for w in words_by_length[lng]:
             if s == sorted(w):
@@ -154,6 +154,8 @@ def go():
     if not case_sensitivity:
         letter_sequence = letter_sequence.lower()
     word_len = word_length.get()
+    if word_len < 2:
+        error_message = 'Must look for words of two or more letters.'
     if word_len > len(letter_sequence):
         error_message = error_message + 'Not enough letters.'
     if error_message == '':
@@ -228,7 +230,7 @@ query_entry = tk.Entry(root, textvariable=input_query, font=(text_font, text_siz
                        fg=fgcolour[theme])
 query_entry.grid(row=1, column=1, columnspan=2, sticky='ew')
 query_entry.bind('<Return>', go_enter)
-word_length = tk.IntVar()
+word_length = tk.IntVar(value=4)
 word_length_entry = tk.Entry(root, textvariable=word_length, font=(text_font, text_size), bg=bgcolour[theme],
                              fg=fgcolour[theme])
 word_length_entry.grid(row=2, column=1, columnspan=2, sticky='ew')
