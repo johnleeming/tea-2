@@ -162,6 +162,7 @@ def get_definition(word):
 
 
 def display_error(error_message):
+    global error_window
     error_state = tk.StringVar()
     error_window = tk.Toplevel()
     error_window.title('Error')
@@ -173,13 +174,34 @@ def display_error(error_message):
     error_state.set(error_message)
 
 
+def display_history(hist):
+    global history_window
+    hist_list = ''
+    for h in hist:
+        hist_list += h[0] + ' (' + h[1] +')' + '\n'
+    history_window = tk.Toplevel()
+    history_window.title('Query History')
+    history_window['bg'] = bgcolour[theme]
+    history_window.geometry('%dx%d+%d+%d' % (winwidth / 2, winheight, winx + winwidth, winy))
+    history_box = scrolledtext.ScrolledText(history_window, background=bgcolour[theme], relief=SOLID, borderwidth=1,
+                                            font=(text_font, text_size - 2), fg=fgcolour[theme], wrap='word',
+                                            height=12, width=int(winwidth / 20))
+    history_box.grid(row=50, column=0, columnspan=4)
+    history_box.insert(1.0, hist_list)
+
+
 def go_enter(event):
     go()
 
 
 def go():
     start_no = 0
-    global match_list, results_window, error_window
+    global match_list, results_window, error_window, history, history_window
+    try:
+        history_window.destroy()
+        print('history window destroy')
+    except Exception:
+        pass
     try:
         results_window.destroy()
     except Exception:
@@ -216,10 +238,15 @@ def go():
             no_results_text += ' (first 40 displayed)'
         match_list.sort()
         display_results(match_list, no_matches, start_no, time_text, no_results_text)
+        result_str = str(no_matches)
     except re.error as error_message:
         display_error(error_message)
+        result_str = 'Regex Error'
     except Exception:
         display_error('Something went wrong.')
+        result_str = 'Other Error'
+    history.append([query, result_str])
+    display_history(history)
 
 
 def toggle(button_no):
@@ -241,6 +268,8 @@ def toggle(button_no):
 root = tk.Tk()
 
 word_list, load_message = load_list(word_file)
+history = []
+
 root.title('Regex-based Word Search')
 root['bg'] = bgcolour[theme]
 root.geometry('%dx%d+%d+%d' % (winwidth, winheight, winx, winy))
@@ -248,22 +277,26 @@ root.grid_columnconfigure(0, weight=1)
 root.grid_columnconfigure(1, weight=1)
 root.grid_columnconfigure(2, weight=1)
 root.grid_columnconfigure(3, weight=1)
+
 load_button_message = tk.StringVar()
 load_button_message.set(load_message)
 load_message_button = tk.Button(root, textvar=load_button_message, font=(text_font, text_size - 1), bg=buttonbg[theme],
                                 fg=fgcolour[theme], command=choose_list)
 load_message_button.grid(row=0, sticky='wn', column=0, columnspan=2, padx=paddingh, pady=paddingv)
+
 ignore_punctuation = tk.BooleanVar()
 punctuation_checkbox = tk.Checkbutton(root, text='Ignore Punctuation', variable=ignore_punctuation, onvalue=True,
                                       offvalue=False, font=(text_font, text_size), bg=bgcolour[theme],
                                       fg=fgcolour[theme])
 punctuation_checkbox.grid(row=0, sticky='wn', column=3, padx=paddingh, pady=paddingv)
 punctuation_checkbox.select()
+
 case_sensitive = tk.BooleanVar()
 case_sensitive_checkbox = tk.Checkbutton(root, text='Case Sensitive', variable=case_sensitive, onvalue=True,
                                          offvalue=False, font=(text_font, text_size), bg=bgcolour[theme],
                                          fg=fgcolour[theme])
 case_sensitive_checkbox.grid(row=0, sticky='wn', column=2, padx=paddingh, pady=paddingv)
+
 prompt = tk.Label(root, text='Enter Regex query: ', font=(text_font, text_size), bg=bgcolour[theme], fg=fgcolour[theme])
 prompt.grid(row=1, column=0, padx=paddingh, pady=paddingv)
 input_query = tk.StringVar()
@@ -272,6 +305,7 @@ query_entry = tk.Entry(root, textvariable=input_query, font=(text_font, text_siz
 query_entry.grid(row=1, column=1, columnspan=2, sticky='ew')
 hint_label = tk.Label(root, text=hint_text, font=(text_font, text_size - 2), bg=bgcolour[theme], fg=fgcolour[theme])
 hint_label.grid(row=3, sticky='wn', column=0, columnspan=4, padx=paddingh, pady=paddingv)
+
 min_length_label = tk.Label(root, text='Minimum length: ', font=(text_font, text_size), bg=bgcolour[theme],
                             fg=fgcolour[theme])
 min_length_label.grid(row=4, column=0, padx=paddingh, pady=paddingv, sticky='ew')
@@ -280,6 +314,7 @@ min_length.set(3)
 min_length_entry = tk.Entry(root, textvariable=min_length, font=(text_font, text_size), bg=bgcolour[theme],
                             fg=fgcolour[theme])
 min_length_entry.grid(row=4, column=1, padx=paddingh, pady=paddingv, sticky='ew')
+
 max_length_label = tk.Label(root, text='Maximum length: ', font=(text_font, text_size), bg=bgcolour[theme],
                             fg=fgcolour[theme])
 max_length_label.grid(row=4, column=2, padx=paddingh, pady=paddingv, sticky='ew')
@@ -288,6 +323,7 @@ max_length.set(12)
 max_length_entry = tk.Entry(root, textvariable=max_length, font=(text_font, text_size), bg=bgcolour[theme],
                             fg=fgcolour[theme])
 max_length_entry.grid(row=4, column=3, padx=paddingh, pady=paddingv, sticky='ew')
+
 alpha_start_label = tk.Label(root, text='Alphabetic start: ', font=(text_font, text_size), bg=bgcolour[theme],
                              fg=fgcolour[theme])
 alpha_start_label.grid(row=5, column=0, padx=paddingh, pady=paddingv, sticky='ew')
@@ -302,17 +338,20 @@ alpha_end = tk.StringVar()
 alpha_end_entry = tk.Entry(root, textvariable=alpha_end, font=(text_font, text_size), bg=bgcolour[theme],
                            fg=fgcolour[theme])
 alpha_end_entry.grid(row=5, column=3, padx=paddingh, pady=paddingv, sticky='ew')
+
 num_words_label = tk.Label(root, text='Number of words:', font=(text_font, text_size), bg=bgcolour[theme],
                            fg=fgcolour[theme])
 num_words_label.grid(row=6, column=0, padx=paddingh, pady=paddingv, sticky='ew')
 num_words = tk.IntVar(value=1)
 num_words = tk.Entry(root, textvariable=num_words, font=(text_font, text_size), bg=bgcolour[theme], fg=fgcolour[theme])
 num_words.grid(row=6, column=1, padx=paddingh, pady=paddingv, sticky='ew')
+
 contains_greek_char = tk.BooleanVar()
 contains_greek_char_checkbox = tk.Checkbutton(root, text='Contains Greek', variable=contains_greek_char, onvalue=True,
                                               offvalue=False, font=(text_font, text_size), bg=bgcolour[theme],
                                               fg=fgcolour[theme])
 contains_greek_char_checkbox.grid(row=6, sticky='wn', column=2, padx=paddingh, pady=paddingv)
+
 enter_button = tk.Button(root, text="Go", font=(text_font, text_size), bg=buttonbg[theme], fg=fgcolour[theme],
                          command=go).grid(row=6, column=3, padx=paddingh, pady=paddingv, sticky='ew')
 root.bind('<Return>', go_enter)
