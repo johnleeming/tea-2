@@ -199,7 +199,6 @@ def go():
     global match_list, results_window, error_window, history, history_window
     try:
         history_window.destroy()
-        print('history window destroy')
     except Exception:
         pass
     try:
