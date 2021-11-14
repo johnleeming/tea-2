@@ -185,7 +185,7 @@ def display_history(hist):
     history_window.geometry('%dx%d+%d+%d' % (winwidth / 2, winheight, winx + winwidth, winy))
     history_box = scrolledtext.ScrolledText(history_window, background=bgcolour[theme], relief=SOLID, borderwidth=1,
                                             font=(text_font, text_size - 2), fg=fgcolour[theme], wrap='word',
-                                            height=12, width=int(winwidth / 20))
+                                            sticky='wens', height=12, width=int(winwidth / 20))
     history_box.grid(row=50, column=0, columnspan=4)
     history_box.insert(1.0, hist_list)
 
