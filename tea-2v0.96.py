@@ -265,6 +265,10 @@ def toggle(button_no):
         match_word[button_no].config(relief="raised")
 
 
+def end_prog(event):
+    root.quit()
+
+
 root = tk.Tk()
 
 word_list, load_message = load_list(word_file)
@@ -356,5 +360,5 @@ contains_greek_char_checkbox.grid(row=6, sticky='wn', column=2, padx=paddingh, p
 enter_button = tk.Button(root, text="Go", font=(text_font, text_size), bg=buttonbg[theme], fg=fgcolour[theme],
                          command=go).grid(row=6, column=3, padx=paddingh, pady=paddingv, sticky='ew')
 root.bind('<Return>', go_enter)
-root.bind('<Escape>', exit())
+root.bind('<Escape>', end_prog)
 root.mainloop()
