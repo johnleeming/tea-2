@@ -278,33 +278,34 @@ root.grid_columnconfigure(1, weight=1)
 root.grid_columnconfigure(2, weight=1)
 root.grid_columnconfigure(3, weight=1)
 
+prompt = tk.Label(root, text='Enter Regex query: ', font=(text_font, text_size), bg=bgcolour[theme], fg=fgcolour[theme])
+prompt.grid(row=0, column=0, padx=paddingh, pady=paddingv)
+input_query = tk.StringVar()
+query_entry = tk.Entry(root, textvariable=input_query, font=(text_font, text_size), bg=bgcolour[theme],
+                       fg=fgcolour[theme])
+query_entry.grid(row=0, column=1, columnspan=3, sticky='ew')
+query_entry.focus()
+hint_label = tk.Label(root, text=hint_text, font=(text_font, text_size - 2), bg=bgcolour[theme], fg=fgcolour[theme])
+hint_label.grid(row=1, sticky='en', column=0, columnspan=4, padx=paddingh, pady=paddingv)
+
 load_button_message = tk.StringVar()
 load_button_message.set(load_message)
 load_message_button = tk.Button(root, textvar=load_button_message, font=(text_font, text_size - 1), bg=buttonbg[theme],
                                 fg=fgcolour[theme], command=choose_list)
-load_message_button.grid(row=0, sticky='wn', column=0, columnspan=2, padx=paddingh, pady=paddingv)
-
-ignore_punctuation = tk.BooleanVar()
-punctuation_checkbox = tk.Checkbutton(root, text='Ignore Punctuation', variable=ignore_punctuation, onvalue=True,
-                                      offvalue=False, font=(text_font, text_size), bg=bgcolour[theme],
-                                      fg=fgcolour[theme])
-punctuation_checkbox.grid(row=0, sticky='wn', column=3, padx=paddingh, pady=paddingv)
-punctuation_checkbox.select()
+load_message_button.grid(row=2, sticky='wn', column=0, columnspan=2, padx=paddingh, pady=paddingv)
 
 case_sensitive = tk.BooleanVar()
 case_sensitive_checkbox = tk.Checkbutton(root, text='Case Sensitive', variable=case_sensitive, onvalue=True,
                                          offvalue=False, font=(text_font, text_size), bg=bgcolour[theme],
                                          fg=fgcolour[theme])
-case_sensitive_checkbox.grid(row=0, sticky='wn', column=2, padx=paddingh, pady=paddingv)
+case_sensitive_checkbox.grid(row=2, sticky='wn', column=2, padx=paddingh, pady=paddingv)
 
-prompt = tk.Label(root, text='Enter Regex query: ', font=(text_font, text_size), bg=bgcolour[theme], fg=fgcolour[theme])
-prompt.grid(row=1, column=0, padx=paddingh, pady=paddingv)
-input_query = tk.StringVar()
-query_entry = tk.Entry(root, textvariable=input_query, font=(text_font, text_size), bg=bgcolour[theme],
-                       fg=fgcolour[theme])
-query_entry.grid(row=1, column=1, columnspan=2, sticky='ew')
-hint_label = tk.Label(root, text=hint_text, font=(text_font, text_size - 2), bg=bgcolour[theme], fg=fgcolour[theme])
-hint_label.grid(row=3, sticky='wn', column=0, columnspan=4, padx=paddingh, pady=paddingv)
+ignore_punctuation = tk.BooleanVar()
+punctuation_checkbox = tk.Checkbutton(root, text='Ignore Punctuation', variable=ignore_punctuation, onvalue=True,
+                                      offvalue=False, font=(text_font, text_size), bg=bgcolour[theme],
+                                      fg=fgcolour[theme])
+punctuation_checkbox.grid(row=2, sticky='wn', column=3, padx=paddingh, pady=paddingv)
+punctuation_checkbox.select()
 
 min_length_label = tk.Label(root, text='Minimum length: ', font=(text_font, text_size), bg=bgcolour[theme],
                             fg=fgcolour[theme])
