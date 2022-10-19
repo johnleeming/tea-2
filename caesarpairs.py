@@ -59,9 +59,9 @@ def load_list(filename):
     return temp_list, load_message
 
 
-def check_word(list, word):
+def check_word(w_list, word):
     try:
-        ind = list.index(word)
+        ind = w_list.index(word)
     except Exception:
         ind = -1
     return ind
@@ -74,17 +74,18 @@ def contains_greek_character(w):
     return False
 
 
-def find_matches(query, list, min, max, ignore_punct, case_sense, start, end, n_words, c_gr_ch):
+def find_matches(query, w_list, min, max, ignore_punct, case_sense, start, end, n_words, c_gr_ch, c_p_w):
     start_time = datetime.now()
     matches = []
+    match_pairs = []
     no_matches = 0
     if start == -1:  # if nothing entered in start field, start from beginning
         start = 0
     if end == -1:  # if nothing entered in end field continue to end
-        end = len(list)
+        end = len(w_list)
     k = start
     while k < end:
-        i = list[k]
+        i = w_list[k]
         j = i
         if ignore_punct:
             j = j.translate(punctuation)
@@ -97,27 +98,32 @@ def find_matches(query, list, min, max, ignore_punct, case_sense, start, end, n_
                     if contains_greek_character(j):
                         matches.append(i)
                         no_matches += 1
+                elif c_p_w:
+                    pairs = find_pairs(i, w_list)
+                    if len(pairs) > 0:
+                        matches.append(i)
+                        match_pairs.append(pairs)
                 else:
                     matches.append(i)
                     no_matches += 1
         k += 1
     end_time = datetime.now()
     time_taken = end_time - start_time
-    return matches, no_matches, time_taken
+    return matches, no_matches, time_taken, match_pairs
 
 
-def find_pairs(word, list):
+def find_pairs(word, w_list):
     l_word = word.lower()
     l_word = l_word.translate(punctuation)
     test_word = ""
     pairs = []
-    for i in range(1,25):
+    for i in range(1, 25):
         for c in l_word:
-            j = ord(c)- 96 + i
+            j = ord(c) - 96 + i
             if j > 26:
                 j = j - 26
             test_word += chr(j + 96)
-        if test_word in list:
+        if test_word in w_list:
             pairs.append(test_word)
     return pairs
 
@@ -194,7 +200,7 @@ def display_history(hist):
     global history_window
     hist_list = ''
     for h in hist:
-        hist_list += h[0] + ' (' + h[1] +')' + '\n'
+        hist_list += h[0] + ' (' + h[1] + ')' + '\n'
     history_window = tk.Toplevel()
     history_window.title('Query History')
     history_window['bg'] = bgcolour[theme]
@@ -237,6 +243,7 @@ def go():
     end_ind = check_word(word_list, a_end)
     if a_end != '' and end_ind == -1:
         display_error('End word not in list, will continue to end.')
+    c_p_wanted = caesar_pairs_wanted.get()
     ignore_punct = ignore_punctuation.get()
     case_sensitivity = case_sensitive.get()
     contains_gr_ch = contains_greek_char.get()
@@ -244,9 +251,9 @@ def go():
         query = query.lower()
     try:
         re_query = re.compile(query)
-        match_list, no_matches, search_time = find_matches(re_query, word_list, min_len, max_len, ignore_punct,
+        match_list, no_matches, search_time, match_pair_list = find_matches(re_query, word_list, min_len, max_len, ignore_punct,
                                                            case_sensitivity, start_ind, end_ind, n_words,
-                                                           contains_gr_ch)
+                                                           contains_gr_ch, c_p_wanted)
         time_text = 'search took: ' + str(search_time.total_seconds()) + ' seconds'
         no_results_text = str(no_matches) + ' matches found'
         if no_matches > 40:
@@ -312,6 +319,12 @@ load_button_message.set(load_message)
 load_message_button = tk.Button(root, textvar=load_button_message, font=(text_font, text_size - 1), bg=buttonbg[theme],
                                 fg=fgcolour[theme], command=choose_list)
 load_message_button.grid(row=2, sticky='wn', column=0, columnspan=2, padx=paddingh, pady=paddingv)
+
+caesar_pairs_wanted = tk.BooleanVar()
+caesar_pairs_checkbox = tk.Checkbutton(root, text='Caesar Pairs?', variable=caesar_pairs_wanted, onvalue=True,
+                                       offvalue=False, font=(text_font, text_size), bg=bgcolour[theme],
+                                       fg=fgcolour[theme])
+caesar_pairs_checkbox.grid(row=2, sticky='en', column=1, padx=paddingh, pady=paddingv)
 
 case_sensitive = tk.BooleanVar()
 case_sensitive_checkbox = tk.Checkbutton(root, text='Case Sensitive', variable=case_sensitive, onvalue=True,
