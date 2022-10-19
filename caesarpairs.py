@@ -123,8 +123,10 @@ def find_pairs(word, w_list):
             if j > 26:
                 j = j - 26
             test_word += chr(j + 96)
+        print(test_word)
         if test_word in w_list:
             pairs.append(test_word)
+        test_word = ""
     return pairs
 
 
