@@ -1,12 +1,12 @@
+import logging
 import os
 import re
 import subprocess
 import tkinter as tk
+from datetime import datetime
+from tkinter import *
 from tkinter import filedialog
 from tkinter import scrolledtext
-from tkinter import *
-from datetime import datetime
-import logging
 
 home_path = os.path.expanduser('~/')
 word_file = home_path + 'word_lists/default.txt'
@@ -178,7 +178,7 @@ def display_history(hist):
     global history_window
     hist_list = ''
     for h in hist:
-        hist_list += h[0] + ' (' + h[1] +')' + '\n'
+        hist_list += h[0] + ' (' + h[1] + ')' + '\n'
     history_window = tk.Toplevel()
     history_window.title('Query History')
     history_window['bg'] = bgcolour[theme]
