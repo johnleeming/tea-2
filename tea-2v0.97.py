@@ -17,16 +17,6 @@ fgcolour = {'dark': 'white', 'light': 'black', 'alarm': 'black'}
 buttonbg = {'dark': 'darkgrey', 'light': 'lightgrey', 'alarm': 'darkgrey'}
 theme = 'light'
 
-screen_width = root.winfo_screenwidth()
-screen_height = root.winfo_screenheight()
-winheight = 15 * text_size + 20
-winwidth = 1000
-rwinheight = 850 - winheight
-winx = 100
-winy = 0
-rwiny = winy + winheight + 65
-paddingh = 5
-paddingv = 5
 hint_text = "[abc] - one of the listed letters | . any character | * 0 or more | + 1 or more | ? optional | " \
             "(a|b) a or b | ^ beginning | $ end "
 log_file = home_path + 'logs/tea-2.log'
@@ -170,7 +160,7 @@ def display_error(error_message):
     error_window = tk.Toplevel()
     error_window.title('Error')
     error_window['bg'] = bgcolour[theme]
-    error_window.geometry('%dx%d+%d+%d' % (winwidth / 4, winheight, winx + winwidth, winy))
+    error_window.geometry('%dx%d+%d+%d' % (winwidth / 4, winheight, (winx * 4)+ winwidth, winy))
     error_label = tk.Label(error_window, textvar=error_state, font=(text_font, text_size), bg=bgcolour[theme],
                            fg='red', wraplength=(winwidth / 4 - 10)).pack()
     logging.exception(error_message)
@@ -185,7 +175,7 @@ def display_history(hist):
     history_window = tk.Toplevel()
     history_window.title('Query History')
     history_window['bg'] = bgcolour[theme]
-    history_window.geometry('%dx%d+%d+%d' % (winwidth / 2, winheight, winx + winwidth, winy))
+    history_window.geometry('%dx%d+%d+%d' % (winwidth / 2, winheight, (winx * 4) + winwidth, winy))
     history_box = scrolledtext.ScrolledText(history_window, background=bgcolour[theme], relief=SOLID, borderwidth=1,
                                             font=(text_font, text_size - 2), fg=fgcolour[theme], wrap='word',
                                             height=12, width=int(winwidth / 20))
@@ -273,6 +263,16 @@ def end_prog(event):
 
 root = tk.Tk()
 
+screen_width = root.winfo_screenwidth()
+screen_height = root.winfo_screenheight()
+winheight = int(screen_height / 5)
+winwidth = int(screen_width / 2)
+rwinheight = winheight * 3
+winx = 100
+winy = 0
+rwiny = winy + winheight + 200
+paddingh = 5
+paddingv = 5
 word_list, load_message = load_list(word_file)
 history = []
 
